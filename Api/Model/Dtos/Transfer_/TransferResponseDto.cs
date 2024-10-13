@@ -7,9 +7,11 @@ public class TransferResponseDto: IDto
 {
     public Guid Id { get; set; }
     public Guid TransferTypeId { get; set; }
-    public Guid SenderAccountNo { get; set; }
-    public Guid RecipientAccountNo { get; set; }
-    public DateTime Date { get; set; }
+    public Guid SenderAccountId { get; set; }
+    public Guid RecipientAccountId { get; set; }
+    public Guid SenderUserId { get; set; }
+    public Guid RecipientUserId { get; set; }
+    public DateTime Date { get; set; } 
     public bool Status { get; set; }
     public string? RejectionDetailDescription { get; set; }
     public double Amount { get; set; }

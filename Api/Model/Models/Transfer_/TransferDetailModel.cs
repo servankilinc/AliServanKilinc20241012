@@ -1,9 +1,10 @@
-﻿using Core.Model;
-using Model.Entities;
+﻿using Model.Dtos.Account_;
+using Model.Dtos.TransferType_;
+using Model.Dtos.User_;
 
-namespace Model.Dtos.Transfer_;
+namespace Model.Models.Transfer_;
 
-public class TransferDetailResponseDto : IDto
+public class TransferDetailModel
 {
     public Guid Id { get; set; }
     public Guid TransferTypeId { get; set; }
@@ -17,9 +18,9 @@ public class TransferDetailResponseDto : IDto
     public double Amount { get; set; }
     public string? Description { get; set; }
 
-    public TransferType? TransferType { get; set; }
-    public Account? SenderAccount { get; set; }
-    public Account? ReceivingAccount { get; set; }
-    public User? SenderUser { get; set; }
-    public User? ReceivingUser { get; set; }
+    public TransferTypeResponseDto? TransferType { get; set; }
+    public AccountResponseDto? SenderAccount { get; set; }
+    public AccountResponseDto? ReceivingAccount { get; set; }
+    public UserResponseDto? SenderUser { get; set; }
+    public UserResponseDto? ReceivingUser { get; set; }
 }

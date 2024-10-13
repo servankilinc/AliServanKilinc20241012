@@ -5,6 +5,7 @@ namespace Model.Dtos.Account_;
 
 public class AccountResponseDto: IDto
 {
+    public Guid Id { get; set; }
     public string AccountNo { get; set; } = null!;
     public Guid AccountTypeId { get; set; }
     public Guid UserId { get; set; }

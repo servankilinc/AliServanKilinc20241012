@@ -7,6 +7,7 @@ public class User : IdentityUser<Guid>, IEntity
 {
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
+    public DateTime RegistrationDate { get; set; }
 
     public ICollection<Account>? Accounts { get; set; }
     public ICollection<Transfer>? ShippingProcesses { get; set; }

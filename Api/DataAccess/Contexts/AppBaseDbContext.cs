@@ -47,11 +47,11 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
             
             a.HasMany(a => a.ShippingProcesses)
                .WithOne(t => t.SenderAccount)
-               .HasForeignKey(t=> t.SenderAccountNo);
+               .HasForeignKey(t=> t.SenderAccountId);
 
             a.HasMany(a => a.PurchaseProcesses)
                .WithOne(t => t.ReceivingAccount)
-               .HasForeignKey(t => t.RecipientAccountNo);
+               .HasForeignKey(t => t.RecipientAccountId);
         });
 
         modelBuilder.Entity<AccountType>(at =>
@@ -72,8 +72,8 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
             t.HasKey(t => t.Id);
             t.Property(t => t.Id).HasColumnName("Id");
             t.Property(t => t.TransferTypeId).HasColumnName("TransferTypeId");
-            t.Property(t => t.SenderAccountNo).HasColumnName("SenderAccountNo");
-            t.Property(t => t.RecipientAccountNo).HasColumnName("RecipientAccountNo");
+            t.Property(t => t.SenderAccountId).HasColumnName("SenderAccountId");
+            t.Property(t => t.RecipientAccountId).HasColumnName("RecipientAccountId");
             t.Property(t => t.SenderUserId).HasColumnName("SenderUserId");
             t.Property(t => t.RecipientUserId).HasColumnName("RecipientUserId");
             t.Property(t => t.Date).HasColumnName("Date");
@@ -88,11 +88,11 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             t.HasOne(t => t.SenderAccount)
                 .WithMany(a => a.ShippingProcesses)
-                .HasForeignKey(t => t.SenderAccountNo);
+                .HasForeignKey(t => t.SenderAccountId);
 
             t.HasOne(t => t.ReceivingAccount)
                 .WithMany(a => a.PurchaseProcesses)
-                .HasForeignKey(t => t.RecipientAccountNo);
+                .HasForeignKey(t => t.RecipientAccountId);
 
             t.HasOne(t => t.SenderUser)
                 .WithMany(u => u.ShippingProcesses)
@@ -120,6 +120,7 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
             u.ToTable("Users");
             u.Property(u => u.FirstName).HasColumnName("FirstName");
             u.Property(u => u.LastName).HasColumnName("LastName");
+            u.Property(u => u.RegistrationDate).HasColumnName("RegistrationDate");
 
             u.HasMany(u => u.Accounts)
                 .WithOne(a => a.User)
