@@ -5,6 +5,7 @@ namespace Model.Entities;
 
 public class User : IdentityUser<Guid>, ISoftDeletableEntity
 {
+    public string? TCKNO { get; set; }
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public DateTime RegistrationDate { get; set; }

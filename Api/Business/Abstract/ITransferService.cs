@@ -10,5 +10,5 @@ public interface ITransferService
     Task<Paginate<TransferDetailModel>> GetAccountHistoryAsync(AccountHistoryRequestModel requestModel, CancellationToken cancellationToken);
     Task<List<TransferTypeResponseDto>> GetTransferTypeListAsync(CancellationToken cancellationToken);
     Task SendTransferRequestAsync(TransferRequestModel transferRequestModel, CancellationToken cancellationToken);
-    Task RejectTransferAsync(TransferRejectModel rejectModel, CancellationToken cancellationToken);
+    Task RejectTransferAsync(TransferRejectRequestModel rejectModel, CancellationToken cancellationToken);
 }

@@ -106,7 +106,7 @@ public class TransferService : ITransferService
         await _transferRepository.ApplyTransferAsync(transferToInsert, senderAccount, recipientAccount, cancellationToken); 
     }
 
-    public async Task RejectTransferAsync(TransferRejectModel rejectModel, CancellationToken cancellationToken)
+    public async Task RejectTransferAsync(TransferRejectRequestModel rejectModel, CancellationToken cancellationToken)
     {
         Transfer transfer = await _transferRepository.GetAsync(filter: t => t.Id == rejectModel.TransferId, cancellationToken: cancellationToken);
         if (transfer == null) throw new Exception("İşlem Bulunamadı!");

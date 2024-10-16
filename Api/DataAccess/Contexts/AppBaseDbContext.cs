@@ -140,6 +140,8 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
         modelBuilder.Entity<User>(u =>
         {
             u.ToTable("Users");
+            u.HasAlternateKey(u => u.TCKNO);
+            u.Property(u => u.TCKNO).HasColumnName("TCKNO");
             u.Property(u => u.FirstName).HasColumnName("FirstName");
             u.Property(u => u.LastName).HasColumnName("LastName");
             u.Property(u => u.RegistrationDate).HasColumnName("RegistrationDate");

@@ -1,0 +1,27 @@
+﻿using AutoMapper;
+using Model.Dtos.Account_;
+using Model.Dtos.AccountType_;
+using Model.Dtos.TransferType_;
+using Model.Dtos.User_;
+using Model.Entities;
+
+namespace Business.MappingProfiles_;
+
+public class MappingProfiles : Profile
+{
+    public MappingProfiles()
+    {
+        // CreateMap<source, dest>
+
+
+        CreateMap<Account, AccountResponseDto>().ReverseMap();
+        CreateMap<AccountCreateDto, Account>().ReverseMap();
+
+        CreateMap<AccountType, AccountTypeResponseDto>().ReverseMap();
+
+        CreateMap<TransferType, TransferTypeResponseDto>().ReverseMap();
+
+        CreateMap<User, UserResponseDto>().ReverseMap();
+        CreateMap<UserUpdateDto, User>().ReverseMap();
+    }
+}
