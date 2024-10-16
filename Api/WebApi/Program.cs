@@ -11,6 +11,7 @@ using Model.Entities;
 using Core.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using WebApi.GlobalExceptionHandler;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -18,7 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ----------------------------- Rate Limiter Implementation -----------------------------
+// -------------------- Rate Limiter Implementation --------------------
 var _policyName = "sliding";
 builder.Services.AddRateLimiter(options =>
 {
@@ -33,7 +34,7 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// ----------------------------- Layer Implematations -----------------------------
+// -------------------- Layer Implematations --------------------
 builder.Services.AddServices_Model();
 builder.Services.AddServices_DataAccess(builder.Configuration);
 builder.Services.AddServices_Business();
@@ -93,6 +94,10 @@ builder.Services.AddAuthentication(options =>
 // -------------------- JWT Token --------------------
 
 
+// -------------------- Global Exception Handler --------------------
+builder.Services.AddExceptionHandler<ExceptionHandler>();
+builder.Services.AddProblemDetails();
+// -------------------- Global Exception Handler --------------------
 
 var app = builder.Build();
 
@@ -101,6 +106,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseExceptionHandler();
 
 app.UseHttpsRedirection();
 
