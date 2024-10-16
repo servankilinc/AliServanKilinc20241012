@@ -2,7 +2,7 @@
 
 namespace Model.Entities;
 
-public class Account : IEntity
+public class Account : SoftDeletableEntity
 {
     public Guid Id { get; set; }
     public string AccountNo { get; set; } = null!;

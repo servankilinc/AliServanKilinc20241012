@@ -13,7 +13,7 @@ using Core.DataAccess.Extensions;
 namespace DataAccess.Concrete.RepositoryBase;
 
 public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IRepositoryAsync<TEntity>
-    where TEntity : class, IEntity 
+    where TEntity : class, IEntity
     where TContext : IdentityDbContext<User, IdentityRole<Guid>, Guid>
 {
     protected TContext _context { get; set; }
@@ -22,9 +22,10 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
 
 
     // ************* SYNC PROCESSES **************
-    public TEntity Get(Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null)
+    public TEntity Get(Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
         return queryable.FirstOrDefault(filter)!;
     }
@@ -42,13 +43,6 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         _context.SaveChanges();
     }
 
-    public TEntity Update(TEntity entity)
-    {
-        _context.Entry(entity).State = EntityState.Modified;
-        _context.SaveChanges();
-        return entity;
-    }
-
     public void DeleteByFilter(Expression<Func<TEntity, bool>> filter)
     {
         var entity = _context.Set<TEntity>().Where(filter).FirstOrDefault();
@@ -57,21 +51,36 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         _context.SaveChanges();
     }
 
-    public bool IsExist(Expression<Func<TEntity, bool>> filter)
+    public TEntity Update(TEntity entity)
     {
-        return _context.Set<TEntity>().Any(filter);
+        _context.Entry(entity).State = EntityState.Modified;
+        _context.SaveChanges();
+        return entity;
+    }
+
+    public bool IsExist(Expression<Func<TEntity, bool>> filter, bool withDeleted = false)
+    {
+        IQueryable<TEntity> queryable = _context.Set<TEntity>();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
+        return queryable.Any(filter);
     }
 
     public ICollection<TEntity> GetAll(
-        Expression<Func<TEntity, bool>>? filter = null,
+        Filter? filter = null,
+        Sort? sort = null,
+        Expression<Func<TEntity, bool>>? where = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        bool withDeleted = false,
         bool enableTracking = true)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
         if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable = queryable.Where(filter);
+        if (filter != null) queryable.ToFilter(filter);
+        if (sort != null) queryable.ToSort(sort);
+        if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return orderBy(queryable).ToList();
         return queryable.ToList();
@@ -79,44 +88,26 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
 
 
     public Paginate<TEntity> GetPaginatedList(
-        Expression<Func<TEntity, bool>>? filter = null,
+        Filter? filter = null,
+        Sort? sort = null,
+        Expression<Func<TEntity, bool>>? where = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        int index = default,
-        int size = default,
+        int page = default,
+        int pageSize = default,
+        bool withDeleted = false,
         bool enableTracking = true)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
         if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable = queryable.Where(filter);
+        if (filter != null) queryable.ToFilter(filter);
+        if (sort != null) queryable.ToSort(sort);
+        if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
-            return orderBy(queryable).ToPaginate(index, size);
-        return queryable.ToPaginate(index, size);
-    }
-
-    public ICollection<TEntity> GetAllByDynamic(
-        DynamicQuery dynamicQuery,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        bool enableTracking = true)
-    {
-        IQueryable<TEntity> queryable = _context.Set<TEntity>().AsQueryable().ToDynamic(dynamicQuery);
-        if (!enableTracking) queryable = queryable.AsNoTracking();
-        if (include != null) queryable = include(queryable);
-        return queryable.ToList();
-    }
-
-    public Paginate<TEntity> GetPaginatedListByDynamic(
-        DynamicQuery dynamicQuery,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        int index = default,
-        int size = default,
-        bool enableTracking = true)
-    {
-        IQueryable<TEntity> queryable = _context.Set<TEntity>().AsQueryable().ToDynamic(dynamicQuery);
-        if (!enableTracking) queryable = queryable.AsNoTracking();
-        if (include != null) queryable = include(queryable);
-        return queryable.ToPaginate(index, size);
+            return orderBy(queryable).ToPaginate(page, pageSize);
+        return queryable.ToPaginate(page, pageSize);
     }
 
 
@@ -125,11 +116,13 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
     public async Task<TEntity> GetAsync(
         Expression<Func<TEntity, bool>> filter,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
         if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
         var result = await queryable.FirstOrDefaultAsync(filter, cancellationToken);
         return result!;
@@ -162,68 +155,57 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         await _context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<bool> IsExistAsync(Expression<Func<TEntity, bool>> filter, CancellationToken cancellationToken = default)
+    public async Task<bool> IsExistAsync(Expression<Func<TEntity, bool>> filter, bool withDeleted = false, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<TEntity>().AnyAsync(filter, cancellationToken);
+        IQueryable<TEntity> queryable = _context.Set<TEntity>();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
+        return await queryable.AnyAsync(filter, cancellationToken);
     }
 
     public async Task<ICollection<TEntity>> GetAllAsync(
-        Expression<Func<TEntity, bool>>? filter = null,
+        Filter? filter = null,
+        Sort? sort = null,
+        Expression<Func<TEntity, bool>>? where = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
+        bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
         if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable = queryable.Where(filter);
+        if (filter != null) queryable.ToFilter(filter);
+        if (sort != null) queryable.ToSort(sort);
+        if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return await orderBy(queryable).ToListAsync(cancellationToken);
         return await queryable.ToListAsync(cancellationToken);
     }
 
     public async Task<Paginate<TEntity>> GetPaginatedListAsync(
-        Expression<Func<TEntity, bool>>? filter = null,
+        Filter? filter = null,
+        Sort? sort = null,
+        Expression<Func<TEntity, bool>>? where = null,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        int index = default,
-        int size = default,
+        int page = default,
+        int pageSize = default,
+        bool withDeleted = false,
         bool enableTracking = true,
         CancellationToken cancellationToken = default)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
         if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable = queryable.Where(filter);
+        if (filter != null) queryable.ToFilter(filter);
+        if (sort != null) queryable.ToSort(sort);
+        if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
-            return await orderBy(queryable).ToPaginateAsync(index, size, cancellationToken);
-        return await queryable.ToPaginateAsync(index, size, cancellationToken);
+            return await orderBy(queryable).ToPaginateAsync(page, pageSize, cancellationToken);
+        return await queryable.ToPaginateAsync(page, pageSize, cancellationToken);
     }
 
-    public async Task<ICollection<TEntity>> GetAllByDynamicAsync(
-        DynamicQuery dynamicQuery,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        bool enableTracking = true,
-        CancellationToken cancellationToken = default)
-    {
-        IQueryable<TEntity> queryable = _context.Set<TEntity>().AsQueryable().ToDynamic(dynamicQuery);
-        if (!enableTracking) queryable = queryable.AsNoTracking();
-        if (include != null) queryable = include(queryable);
-        return await queryable.ToListAsync(cancellationToken);
-    }
-
-    public async Task<Paginate<TEntity>> GetPaginatedListByDynamicAsync(
-        DynamicQuery dynamicQuery,
-        Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
-        int index = default,
-        int size = default,
-        bool enableTracking = true,
-        CancellationToken cancellationToken = default)
-    {
-        IQueryable<TEntity> queryable = _context.Set<TEntity>().AsQueryable().ToDynamic(dynamicQuery);
-        if (!enableTracking) queryable = queryable.AsNoTracking();
-        if (include != null) queryable = include(queryable);
-        return await queryable.ToPaginateAsync(index, size, cancellationToken);
-    }
 }

@@ -2,7 +2,7 @@
 
 namespace Model.Entities;
 
-public class TransferType : IEntity
+public class TransferType : SoftDeletableEntity
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = null!;

@@ -22,7 +22,7 @@ public class AccountService : IAccountService
 
     public async Task<List<AccountResponseDto>> GetUserAccountsAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var list = await _accountRepository.GetAllAsync(filter: f => f.UserId == userId, cancellationToken: cancellationToken);
+        var list = await _accountRepository.GetAllAsync(where: f => f.UserId == userId, cancellationToken: cancellationToken);
 
         return list.Select(_mapper.Map<AccountResponseDto>).ToList();
     }

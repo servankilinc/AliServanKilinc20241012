@@ -5,7 +5,7 @@ using System.Text;
 namespace Core.DataAccess.Extensions;
 
 
-public static class QueryableDynamicQueryExtension
+public static class QueryableFilterSortExtension
 {
     private static readonly string[] _orderDirs = { "asc", "desc" };
     private static readonly string[] _logics = { "and", "or" };
@@ -26,15 +26,8 @@ public static class QueryableDynamicQueryExtension
             { "doesnotcontain", "Contains" }
         };
 
-    public static IQueryable<T> ToDynamic<T>(this IQueryable<T> query, DynamicQuery dynamicQuery)
-    {
-        if (dynamicQuery == null) return query;
-        if (dynamicQuery.Filter is not null) query = Filter(query, dynamicQuery.Filter);
-        if (dynamicQuery.Sort is not null && dynamicQuery.Sort.Any()) query = Sort(query, dynamicQuery.Sort);
-        return query;
-    }
 
-    private static IQueryable<T> Filter<T>(IQueryable<T> queryable, Filter filter)
+    public static IQueryable<T> ToFilter<T>(this IQueryable<T> queryable, Filter filter)
     {
         List<Filter> filterList = new();
         GetFilters(filterList, filter);
@@ -61,20 +54,18 @@ public static class QueryableDynamicQueryExtension
         return queryable;
     }
 
-    private static IQueryable<T> Sort<T>(IQueryable<T> queryable, IEnumerable<Sort> sort)
+    public static IQueryable<T> ToSort<T>(this IQueryable<T> queryable, Sort sort)
     {
-        if (sort.Any())
+        if (sort is not null)
         {
-            foreach (Sort item in sort)
-            {
-                if (string.IsNullOrEmpty(item.Field))
-                    throw new ArgumentException("Empty Field For Sorting Process");
-                if (string.IsNullOrEmpty(item.Dir) || !_orderDirs.Contains(item.Dir))
-                    throw new ArgumentException("Invalid Order Type For Sorting Process");
-            }
-
-            string ordering = string.Join(separator: ",", values: sort.Select(s => $"{s.Field} {s.Dir}"));
-            return queryable.OrderBy(ordering);
+           
+            if (string.IsNullOrEmpty(sort.Field))
+                throw new ArgumentException("Empty Field For Sorting Process");
+            if (string.IsNullOrEmpty(sort.Dir) || !_orderDirs.Contains(sort.Dir))
+                throw new ArgumentException("Invalid Order Type For Sorting Process");
+           
+             
+            return queryable.OrderBy($"{sort.Field} {sort.Dir}");
         }
 
         return queryable;

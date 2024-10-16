@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business.Abstract;
+using Core.DataAccess.Pagination;
 using DataAccess.Abstract;
 using Microsoft.EntityFrameworkCore;
 using Model.Dtos.Account_;
@@ -25,28 +26,22 @@ public class TransferService : ITransferService
         _mapper = mapper;
     }
 
-    public async Task<List<TransferDetailModel>> GetAccountHistoryAsync(AccountHistoryRequestModel requestModel, CancellationToken cancellationToken)
+    public async Task<Paginate<TransferDetailModel>> GetAccountHistoryAsync(AccountHistoryRequestModel requestModel, CancellationToken cancellationToken)
     {
-        var list = await _transferRepository.GetAllAsync(
-            filter: t => 
-                (requestModel.StartDate != null ? DateOnly.FromDateTime(t.Date) >= requestModel.StartDate : true) &&
-                (requestModel.EndDate != null ? DateOnly.FromDateTime(t.Date) <= requestModel.EndDate : true) && 
-                (t.Status == requestModel.ProcessStatus),
-            orderBy: t => 
-                requestModel.SortBy == 1 ? t.OrderByDescending(t => t.Date) : 
-                requestModel.SortBy == 2 ? t.OrderBy(t => t.Date) : 
-                requestModel.SortBy == 3 ? t.OrderByDescending(t => t.Amount) : 
-                requestModel.SortBy == 4 ? t.OrderBy(t => t.Amount) :
-                t.OrderByDescending(t => t.Date),
+        var paginatedList = await _transferRepository.GetPaginatedListAsync(
+            filter: requestModel.Filter,
+            sort: requestModel.Sort,
             include: t => t
                 .Include(t => t.TransferType!)
                 .Include(t => t.SenderAccount!)
                 .Include(t => t.ReceivingAccount!)
                 .Include(t => t.SenderUser!)
                 .Include(t => t.ReceivingUser!),
+            page: requestModel.PagingRequest!.Page,
+            pageSize: requestModel.PagingRequest.PageSize,
             cancellationToken: cancellationToken);
 
-        return list.Select(transfer => new TransferDetailModel
+        var mappedData = paginatedList.Data.Select(transfer => new TransferDetailModel
         {
             Id = transfer.Id,
             TransferTypeId = transfer.TransferTypeId,
@@ -59,13 +54,21 @@ public class TransferService : ITransferService
             RejectionDetailDescription = transfer.RejectionDetailDescription,
             Amount = transfer.Amount,
             Description = transfer.Description,
-            
+
             TransferType = _mapper.Map<TransferTypeResponseDto>(transfer.TransferType),
             SenderAccount = _mapper.Map<AccountResponseDto>(transfer.SenderAccount),
             ReceivingAccount = _mapper.Map<AccountResponseDto>(transfer.ReceivingAccount),
             SenderUser = _mapper.Map<UserResponseDto>(transfer.SenderUser),
             ReceivingUser = _mapper.Map<UserResponseDto>(transfer.ReceivingUser)
         }).ToList();
+        
+        return new Paginate<TransferDetailModel> { 
+            Data = mappedData,
+            DataCount = paginatedList.DataCount,
+            Page = paginatedList.Page,
+            PageSize = paginatedList.PageSize,
+            PageCount = paginatedList.PageCount
+        };
     }
 
     public async Task<List<TransferTypeResponseDto>> GetTransferTypeListAsync(CancellationToken cancellationToken)

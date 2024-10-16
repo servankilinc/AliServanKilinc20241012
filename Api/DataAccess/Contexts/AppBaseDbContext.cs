@@ -12,11 +12,13 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
     }
 
     public override DbSet<User> Users { get; set; }
-
     public DbSet<Account> Accounts { get; set; }
     public DbSet<AccountType> AccountTypes { get; set; }
     public DbSet<Transfer> Transfers { get; set; }
     public DbSet<TransferType> TransferTypes { get; set; }
+
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -39,20 +41,26 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             a.HasOne(a => a.AccountType)
                 .WithMany(at => at.Accounts)
-                .HasForeignKey(a => a.AccountTypeId);
+                .HasForeignKey(a => a.AccountTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             a.HasOne(a => a.User)
                .WithMany(u => u.Accounts)
-               .HasForeignKey(a=> a.UserId);
-            
+               .HasForeignKey(a=> a.UserId)
+               .OnDelete(DeleteBehavior.Restrict);
+
             a.HasMany(a => a.ShippingProcesses)
                .WithOne(t => t.SenderAccount)
-               .HasForeignKey(t=> t.SenderAccountId);
+               .HasForeignKey(t=> t.SenderAccountId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             a.HasMany(a => a.PurchaseProcesses)
                .WithOne(t => t.ReceivingAccount)
-               .HasForeignKey(t => t.RecipientAccountId);
+               .HasForeignKey(t => t.RecipientAccountId)
+               .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<Account>().HasQueryFilter(f => !f.IsDeleted);
+
 
         modelBuilder.Entity<AccountType>(at =>
         {
@@ -63,8 +71,10 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             at.HasMany(at => at.Accounts)
                .WithOne(a => a.AccountType)
-               .HasForeignKey(a => a.AccountTypeId); 
+               .HasForeignKey(a => a.AccountTypeId)
+               .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<AccountType>().HasQueryFilter(f => !f.IsDeleted);
 
         modelBuilder.Entity<Transfer>(t =>
         {
@@ -84,24 +94,32 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             t.HasOne(t => t.TransferType)
                 .WithMany(tt=> tt.Transfers)
-                .HasForeignKey(t => t.TransferTypeId);
+                .HasForeignKey(t => t.TransferTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             t.HasOne(t => t.SenderAccount)
                 .WithMany(a => a.ShippingProcesses)
-                .HasForeignKey(t => t.SenderAccountId);
+                .HasForeignKey(t => t.SenderAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             t.HasOne(t => t.ReceivingAccount)
                 .WithMany(a => a.PurchaseProcesses)
-                .HasForeignKey(t => t.RecipientAccountId);
+                .HasForeignKey(t => t.RecipientAccountId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             t.HasOne(t => t.SenderUser)
                 .WithMany(u => u.ShippingProcesses)
-                .HasForeignKey(t => t.SenderUserId);
+                .HasForeignKey(t => t.SenderUserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             t.HasOne(t => t.ReceivingUser)
                 .WithMany(u => u.PurchaseProcesses)
-                .HasForeignKey(t => t.RecipientUserId);
+                .HasForeignKey(t => t.RecipientUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<Transfer>().HasQueryFilter(f => !f.IsDeleted);
+
+
 
         modelBuilder.Entity<TransferType>(tt =>
         {
@@ -112,8 +130,12 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             tt.HasMany(tt => tt.Transfers)
                .WithOne(t => t.TransferType)
-               .HasForeignKey(t => t.TransferTypeId);
+               .HasForeignKey(t => t.TransferTypeId)
+               .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<TransferType>().HasQueryFilter(f => !f.IsDeleted);
+
+
 
         modelBuilder.Entity<User>(u =>
         {
@@ -124,16 +146,20 @@ public class AppBaseDbContext : IdentityDbContext<User, IdentityRole<Guid>, Guid
 
             u.HasMany(u => u.Accounts)
                 .WithOne(a => a.User)
-                .HasForeignKey(a => a.UserId);
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             u.HasMany(u => u.ShippingProcesses)
                .WithOne(t => t.SenderUser)
-               .HasForeignKey(t => t.SenderUserId);
+               .HasForeignKey(t => t.SenderUserId)
+               .OnDelete(DeleteBehavior.Restrict);
 
             u.HasMany(u => u.PurchaseProcesses)
                .WithOne(t => t.ReceivingUser)
-               .HasForeignKey(t => t.RecipientUserId);
+               .HasForeignKey(t => t.RecipientUserId)
+               .OnDelete(DeleteBehavior.Restrict);
         });
+        modelBuilder.Entity<User>().HasQueryFilter(f => !f.IsDeleted);
 
 
         modelBuilder.Entity<IdentityRole<Guid>>(entity => { entity.ToTable("Roles"); });
