@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business.Abstract;
 using Core.Auth;
+using Core.Exceptions;
 using DataAccess.Abstract;
 using Microsoft.AspNetCore.Identity;
 using Model.Dtos.User_;
@@ -33,10 +34,10 @@ public class AuthService : IAuthService
                 u.TCKNO == loginRequestModel.TCKNO : 
                 u.Email!.ToLower() == loginRequestModel.Email!.ToLower(), 
             cancellationToken: cancellationToken);
-        if (existUser == null) throw new Exception($"Kullanıcı bulunamadı.");
+        if (existUser == null) throw new BusinessException($"Kullanıcı bulunamadı.");
 
         bool passwordStatus = await _userManager.CheckPasswordAsync(existUser, loginRequestModel.Password);
-        if (!passwordStatus) throw new Exception("Girdiğiniz şifre doğru değil.");
+        if (!passwordStatus) throw new BusinessException("Girdiğiniz şifre doğru değil.");
 
         AccessTokenModel tokenModel = await _tokenService.CreateAccessTokenAsync(existUser);
 

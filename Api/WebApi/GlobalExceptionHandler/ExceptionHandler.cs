@@ -3,8 +3,9 @@ using Core.Exceptions.ProblemDetailModels;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Diagnostics;
-using Newtonsoft.Json;
 using System.Net;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace WebApi.GlobalExceptionHandler;
 
@@ -62,7 +63,8 @@ public class ExceptionHandler : IExceptionHandler
     }
     private string CreateInternalException(Exception exception)
     {
-        return JsonConvert.SerializeObject(new Microsoft.AspNetCore.Mvc.ProblemDetails()
+        //JsonConvert.SerializeObject
+        return JsonSerializer.Serialize(new Microsoft.AspNetCore.Mvc.ProblemDetails()
         {
             Status = StatusCodes.Status500InternalServerError,
             Type = ProblemDetailTypes.General.ToString(),

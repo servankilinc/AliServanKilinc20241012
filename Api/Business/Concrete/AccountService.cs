@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using Business.Abstract;
+using Core.Exceptions;
 using DataAccess.Abstract;
 using Model.Dtos.Account_;
-using Model.Dtos.AccountType_;
 using Model.Entities;
 using Model.Models.Account_;
 
@@ -11,14 +11,13 @@ namespace Business.Concrete;
 public class AccountService : IAccountService
 {
     private readonly IAccountRepository _accountRepository;
-    private readonly IAccountTypeRepository _accountTypeRepository;
     private readonly IMapper _mapper;
-    public AccountService(IAccountRepository accountRepository, IAccountTypeRepository accountTypeRepository, IMapper mapper)
+    public AccountService(IAccountRepository accountRepository, IMapper mapper)
     {
         _accountRepository = accountRepository;
-        _accountTypeRepository = accountTypeRepository;
         _mapper = mapper;
     }
+
 
     public async Task<List<AccountResponseDto>> GetUserAccountsAsync(Guid userId, CancellationToken cancellationToken)
     {
@@ -26,6 +25,7 @@ public class AccountService : IAccountService
 
         return list.Select(_mapper.Map<AccountResponseDto>).ToList();
     }
+
 
     public async Task<List<AccountByLastTransfersModel>> GetUserAccountsWithLastTransfersAsync(Guid userId, CancellationToken cancellationToken)
     {
@@ -46,6 +46,7 @@ public class AccountService : IAccountService
         return responseModel;
     }
 
+
     public async Task<AccountResponseDto> CreateAccountAsync(AccountCreateDto accountCreateDto, CancellationToken cancellationToken)
     {
         Account accountToInsert = _mapper.Map<Account>(accountCreateDto);
@@ -64,26 +65,22 @@ public class AccountService : IAccountService
         return _mapper.Map<AccountResponseDto>(createdAccount);
     }
 
-    public async Task<List<AccountTypeResponseDto>> GetAccountTypeListAsync(CancellationToken cancellationToken)
-    {
-        var list = await _accountTypeRepository.GetAllAsync(cancellationToken: cancellationToken);
-        return list.Select(_mapper.Map<AccountTypeResponseDto>).ToList();
-    }
 
     public async Task VerifyAccountAsync(Guid accountId, CancellationToken cancellationToken)
     {
         var account = await _accountRepository.GetAsync(filter: a => a.Id == accountId, cancellationToken: cancellationToken);
-        if (account == null) throw new Exception("Hesap Bulunamadı!");
+        if (account == null) throw new BusinessException("Hesap Bulunamadı!");
         account.IsVerified = true;
         account.VerificationDate = DateTime.Now;
 
         await _accountRepository.UpdateAsync(account, cancellationToken);
     }
 
+
     public async Task RemoveAccountVerificationAsync(Guid accountId, CancellationToken cancellationToken)
     {
         var account = await _accountRepository.GetAsync(filter: a => a.Id == accountId, cancellationToken: cancellationToken);
-        if (account == null) throw new Exception("Hesap Bulunamadı!");
+        if (account == null) throw new BusinessException("Hesap Bulunamadı!");
         account.IsVerified = false;
 
         await _accountRepository.UpdateAsync(account, cancellationToken);

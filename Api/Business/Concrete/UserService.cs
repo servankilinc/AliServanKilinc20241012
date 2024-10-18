@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Business.Abstract;
+using Core.DataAccess.Pagination;
+using Core.Exceptions;
 using DataAccess.Abstract;
 using Microsoft.EntityFrameworkCore;
 using Model.Dtos.User_;
 using Model.Entities;
 using Model.Models.Account_;
+using Model.Models.User_;
 
 namespace Business.Concrete;
 
@@ -28,8 +31,8 @@ public class UserService : IUserService
             include: a => a.Include(a => a.User!),
             cancellationToken: cancellationToken
         );
-        if (account == null) throw new Exception("Bu hesap numarası için bir kayıt bulunamadı");
-        if (account.User!.IsDeleted) throw new Exception("Bu hesap artık kullanıma açık değil.");
+        if (account == null) throw new BusinessException("Bu hesap numarası için bir kayıt bulunamadı");
+        if (account.User!.IsDeleted) throw new BusinessException("Bu hesap artık kullanıma açık değil.");
 
         return new UserAccountBasicModel()
         {
@@ -38,6 +41,25 @@ public class UserService : IUserService
             FirstName = account.User!.FirstName,
             LastName = account.User.LastName,
             UserId = account.UserId,
+        };
+    }
+
+    public async Task<Paginate<UserResponseDto>> GetAllAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken)
+    {
+        Paginate<User> paginated = await _userRepository.GetPaginatedListAsync(
+            filter: userListRequestModel.Filter?? default,
+            sort: userListRequestModel.Sort?? default,
+            page: userListRequestModel.PagingRequest!.Page,
+            pageSize: userListRequestModel.PagingRequest.PageSize
+        );
+
+        return new Paginate<UserResponseDto>
+        {
+            Data = paginated.Data.Select(_mapper.Map<UserResponseDto>).ToList(),
+            DataCount = paginated.DataCount,
+            Page = paginated.Page,
+            PageCount = paginated.PageCount,
+            PageSize = paginated.PageSize
         };
     }
 
@@ -50,7 +72,7 @@ public class UserService : IUserService
     public async Task UpdateUserAsync(UserUpdateDto userUpdateModel, CancellationToken cancellationToken)
     {
         User existData = await _userRepository.GetAsync(filter: u => u.Id == userUpdateModel.Id , cancellationToken: cancellationToken);
-        if (existData == null) throw new Exception("Günceleme işlemi gerçekleştirilemedi.");
+        if (existData == null) throw new BusinessException("Günceleme işlemi gerçekleştirilemedi.");
         await _userRepository.UpdateAsync(_mapper.Map(userUpdateModel, existData), cancellationToken: cancellationToken);
     }
 }

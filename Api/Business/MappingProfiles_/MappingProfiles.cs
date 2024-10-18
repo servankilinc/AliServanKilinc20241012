@@ -18,8 +18,12 @@ public class MappingProfiles : Profile
         CreateMap<AccountCreateDto, Account>().ReverseMap();
 
         CreateMap<AccountType, AccountTypeResponseDto>().ReverseMap();
+        CreateMap<AccountTypeCreateDto, AccountType>().ReverseMap();
+        CreateMap<AccountTypeUpdateDto, AccountType>().ReverseMap();
 
         CreateMap<TransferType, TransferTypeResponseDto>().ReverseMap();
+        CreateMap<TransferTypeCreateDto, TransferType>().ReverseMap();
+        CreateMap<TransferTypeUpdateDto, TransferType>().ReverseMap();
 
         CreateMap<User, UserResponseDto>().ReverseMap();
         CreateMap<UserUpdateDto, User>().ReverseMap();

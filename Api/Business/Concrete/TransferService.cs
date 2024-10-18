@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Business.Abstract;
 using Core.DataAccess.Pagination;
+using Core.Exceptions;
 using DataAccess.Abstract;
 using Microsoft.EntityFrameworkCore;
 using Model.Dtos.Account_;
@@ -11,17 +12,14 @@ using Model.Models.Account_;
 using Model.Models.Transfer_;
 
 namespace Business.Concrete;
-
 public class TransferService : ITransferService
 {
     private readonly ITransferRepository _transferRepository;
-    private readonly ITransferTypeRepository _transferTypeRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly IMapper _mapper;
-    public TransferService(ITransferRepository transferRepository, ITransferTypeRepository transferTypeRepository, IAccountRepository accountRepository, IMapper mapper)
+    public TransferService(ITransferRepository transferRepository, IAccountRepository accountRepository, IMapper mapper)
     {
         _transferRepository= transferRepository;
-        _transferTypeRepository= transferTypeRepository;
         _accountRepository= accountRepository;
         _mapper = mapper;
     }
@@ -70,26 +68,19 @@ public class TransferService : ITransferService
             PageCount = paginatedList.PageCount
         };
     }
-
-    public async Task<List<TransferTypeResponseDto>> GetTransferTypeListAsync(CancellationToken cancellationToken)
-    {
-        var list = await _transferTypeRepository.GetAllAsync(cancellationToken: cancellationToken);
-        return list.Select(_mapper.Map<TransferTypeResponseDto>).ToList();
-    }
-
-
+     
     public async Task SendTransferRequestAsync(TransferRequestModel requestModel, CancellationToken cancellationToken)
     {
         Account recipientAccount = await _accountRepository.GetAsync(filter: a => a.AccountNo == requestModel.RecipientAccountNo, cancellationToken: cancellationToken);
-        if (recipientAccount == null) throw new Exception("Alıcı Hesap Bulunamadı!");
+        if (recipientAccount == null) throw new BusinessException("Alıcı Hesap Bulunamadı!");
         
         Account senderAccount = await _accountRepository.GetAsync(filter: a => a.Id == requestModel.SenderAccountId, cancellationToken: cancellationToken);
-        if (senderAccount == null) throw new Exception("Gönderici Hesap Bulunamadı!");
+        if (senderAccount == null) throw new BusinessException("Gönderici Hesap Bulunamadı!");
 
         // include: a => a.Include(a => a.User!),
-        // if (recipientAccount.User.FirstName == null) throw new Exception("Alıcı Hesap Bulunamadı!");  // To Do: Name Condition
+        // if (recipientAccount.User.FirstName == null) throw new BusinessException("Alıcı Hesap Bulunamadı!");  // To Do: Name Condition
 
-        if (senderAccount.Balance < requestModel.Amount) throw new Exception("İşlem İçin Bakiye Yetersiz!");
+        if (senderAccount.Balance < requestModel.Amount) throw new BusinessException("İşlem İçin Bakiye Yetersiz!");
 
         Transfer transferToInsert = new()
         {
@@ -109,7 +100,7 @@ public class TransferService : ITransferService
     public async Task RejectTransferAsync(TransferRejectRequestModel rejectModel, CancellationToken cancellationToken)
     {
         Transfer transfer = await _transferRepository.GetAsync(filter: t => t.Id == rejectModel.TransferId, cancellationToken: cancellationToken);
-        if (transfer == null) throw new Exception("İşlem Bulunamadı!");
+        if (transfer == null) throw new BusinessException("İşlem Bulunamadı!");
         
         transfer.Status = false;
         transfer.RejectionDetailDescription = rejectModel.Description;
