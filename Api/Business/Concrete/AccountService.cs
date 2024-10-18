@@ -2,7 +2,9 @@
 using Business.Abstract;
 using Core.Exceptions;
 using DataAccess.Abstract;
+using Microsoft.EntityFrameworkCore;
 using Model.Dtos.Account_;
+using Model.Dtos.AccountType_;
 using Model.Entities;
 using Model.Models.Account_;
 
@@ -21,9 +23,21 @@ public class AccountService : IAccountService
 
     public async Task<List<AccountResponseDto>> GetUserAccountsAsync(Guid userId, CancellationToken cancellationToken)
     {
-        var list = await _accountRepository.GetAllAsync(where: f => f.UserId == userId, cancellationToken: cancellationToken);
+        var list = await _accountRepository.GetAllAsync(where: f => f.UserId == userId, include: f => f.Include(a => a.AccountType!), cancellationToken: cancellationToken);
 
-        return list.Select(_mapper.Map<AccountResponseDto>).ToList();
+
+        return list.Select(a => new AccountResponseDto()
+        {
+            AccountNo = a.AccountNo,
+            AccountType = new AccountTypeResponseDto() { Id = a.AccountTypeId, Name = a.AccountType!.Name},
+            AccountTypeId = a.AccountTypeId,
+            Balance = a.Balance,
+            CreatedDate = a.CreatedDate,
+            Id = a.Id,
+            IsVerified = a.IsVerified,
+            UserId = userId,
+            VerificationDate = a.VerificationDate   
+        }).ToList();
     }
 
 

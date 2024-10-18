@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.AccountType_;
 
@@ -9,8 +10,14 @@ namespace WebApi.Controllers;
 public class AccountTypeController : ControllerBase
 {
     private readonly IAccountTypeService _accountTypeService;
-    public AccountTypeController(IAccountTypeService accountTypeService) => _accountTypeService = accountTypeService;
-
+    private readonly IValidator<AccountTypeCreateDto> _validatorAccountTypeCreate;
+    private readonly IValidator<AccountTypeUpdateDto> _validatorAccountTypeUpdate;
+    public AccountTypeController(IAccountTypeService accountTypeService, IValidator<AccountTypeCreateDto> validatorAccountTypeCreate, IValidator<AccountTypeUpdateDto> validatorAccountTypeUpdate)
+    {
+        _accountTypeService = accountTypeService;
+        _validatorAccountTypeCreate = validatorAccountTypeCreate;
+        _validatorAccountTypeUpdate = validatorAccountTypeUpdate;
+    }
 
     [HttpGet("GetAccountTypeList")]
     public async Task<IActionResult> GetAccountTypeList()
@@ -22,6 +29,7 @@ public class AccountTypeController : ControllerBase
     [HttpPost("CreateAccountType")]
     public async Task<IActionResult> CreateAccountType(AccountTypeCreateDto accountTypeCreate)
     {
+        _validatorAccountTypeCreate.Validate(accountTypeCreate);
         AccountTypeResponseDto responseModel = await _accountTypeService.CreateAccountTypeAsync(accountTypeCreate, new CancellationToken());
         return Ok(responseModel);
     }
@@ -29,6 +37,7 @@ public class AccountTypeController : ControllerBase
     [HttpPut("UpdateAccountType")]
     public async Task<IActionResult> UpdateAccountType(AccountTypeUpdateDto accountTypeUpdate)
     {
+        _validatorAccountTypeUpdate.Validate(accountTypeUpdate);
         AccountTypeResponseDto responseModel = await _accountTypeService.UpdateAccountTypeAsync(accountTypeUpdate, new CancellationToken());
         return Ok(responseModel);
     }

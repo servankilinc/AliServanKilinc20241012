@@ -1,5 +1,6 @@
 ﻿using Business.Abstract;
 using Core.DataAccess.Pagination;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.User_;
 using Model.Models.Account_;
@@ -12,8 +13,12 @@ namespace WebApi.Controllers;
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
-    public UserController(IUserService userService) => _userService = userService;
-
+    private readonly IValidator<UserUpdateDto> _validatorUserUpdate;
+    public UserController(IUserService userService, IValidator<UserUpdateDto> validatorUserUpdate)
+    {
+        _userService = userService;
+        _validatorUserUpdate = validatorUserUpdate;
+    }
 
     [HttpGet("GetUser")]
     public async Task<IActionResult> GetUser(Guid userId)
@@ -22,7 +27,7 @@ public class UserController : ControllerBase
         return Ok(responseModel);
     }
 
-    [HttpGet("GetAll")]
+    [HttpPost("GetAll")]
     public async Task<IActionResult> GetAll([FromBody] UserListRequestModel requestModel)
     {
         Paginate<UserResponseDto> responseModel = await _userService.GetAllAsync(requestModel, new CancellationToken());
@@ -32,6 +37,7 @@ public class UserController : ControllerBase
     [HttpGet("FindUserByAccountNo")]
     public async Task<IActionResult> FindUserByAccountNo(string accountNo)
     {
+        if (accountNo == null) throw new ArgumentNullException(nameof(accountNo));
         UserAccountBasicModel responseModel = await _userService.FindUserByAccountNoAsync(accountNo, new CancellationToken());
         return Ok(responseModel);
     }
@@ -39,6 +45,7 @@ public class UserController : ControllerBase
     [HttpPut("UpdateUser")]
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDto userUpdateRequest)
     {
+        _validatorUserUpdate.ValidateAndThrow(userUpdateRequest);
         await _userService.UpdateUserAsync(userUpdateRequest, new CancellationToken());
         return Ok();
     }

@@ -29,11 +29,10 @@ public class AuthService : IAuthService
 
     public async Task<UserLoginResponseModel> Login(UserLoginRequestModel loginRequestModel, CancellationToken cancellationToken)
     {
-        User existUser = await _userRepository.GetAsync(
-            filter: u => loginRequestModel.TCKNO != null ? 
-                u.TCKNO == loginRequestModel.TCKNO : 
-                u.Email!.ToLower() == loginRequestModel.Email!.ToLower(), 
-            cancellationToken: cancellationToken);
+        User? existUser = !string.IsNullOrEmpty(loginRequestModel.Email) ? 
+            await _userRepository.GetAsync(filter: u => u.Email!.ToLower() == loginRequestModel.Email.ToLower(), cancellationToken: cancellationToken) :
+            await _userRepository.GetAsync(filter: u => u.TCKNO == loginRequestModel.TCKNO, cancellationToken: cancellationToken);
+
         if (existUser == null) throw new BusinessException($"Kullanıcı bulunamadı.");
 
         bool passwordStatus = await _userManager.CheckPasswordAsync(existUser, loginRequestModel.Password);

@@ -34,12 +34,6 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// -------------------- Layer Implematations --------------------
-builder.Services.AddServices_Model();
-builder.Services.AddServices_DataAccess(builder.Configuration);
-builder.Services.AddServices_Business();
-
-
 // -------------------- IDENTITY --------------------
 builder.Services.AddAuthorization();
 
@@ -91,13 +85,18 @@ builder.Services.AddAuthentication(options =>
         };
     }
     );
-// -------------------- JWT Token --------------------
 
 
 // -------------------- Global Exception Handler --------------------
 builder.Services.AddExceptionHandler<ExceptionHandler>();
 builder.Services.AddProblemDetails();
-// -------------------- Global Exception Handler --------------------
+
+
+// -------------------- Layer Implematations --------------------
+builder.Services.AddServices_Model();
+builder.Services.AddServices_DataAccess(builder.Configuration);
+builder.Services.AddServices_Business();
+
 
 var app = builder.Build();
 

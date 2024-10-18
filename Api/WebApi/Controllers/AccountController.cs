@@ -1,4 +1,5 @@
 ﻿using Business.Abstract;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.Account_;
 using Model.Models.Account_;
@@ -10,8 +11,12 @@ namespace WebApi.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
-    public AccountController(IAccountService accountService) => _accountService = accountService;
-
+    private readonly IValidator<AccountCreateDto> _validatorAccountCreate;
+    public AccountController(IAccountService accountService, IValidator<AccountCreateDto> validatorAccountCreate)
+    {
+        _accountService = accountService;
+        _validatorAccountCreate = validatorAccountCreate;
+    }
 
     [HttpGet("GetUserAccounts")]
     public async Task<IActionResult> GetUserAccounts(Guid userId)
@@ -30,6 +35,7 @@ public class AccountController : ControllerBase
     [HttpPost("CreateAccount")]
     public async Task<IActionResult> CreateAccount(AccountCreateDto createRequest)
     {
+        _validatorAccountCreate.ValidateAndThrow(createRequest);
         AccountResponseDto responseModel = await _accountService.CreateAccountAsync(createRequest, new CancellationToken());
         return Ok(responseModel);
     }
