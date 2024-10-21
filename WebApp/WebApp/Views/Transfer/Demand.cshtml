@@ -1,0 +1,171 @@
+﻿@using Model.Dtos.Account_
+@using Model.Models.Transfer_
+@model TransferRequestModel
+@{
+    ViewData["Title"] = "Para Transferi";
+}
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <!-- STEPPER -->
+        <div id="transfer_stepper" class="bs-stepper linear">
+            <!-- HEADER STEPPER -->
+            <div class="bs-stepper-header border-bottom mb-4 pb-2" role="tablist">
+                <div class="step active" data-target="#sender-account-selection">
+                    <button type="button" class="step-trigger" role="tab" id="sender-account-selection-trigger" aria-controls="sender-account-selection" aria-selected="true">
+                        <span class="bs-stepper-circle">1</span>
+                        <span class="bs-stepper-label">Gönderim Yapılcak Hesabı Seçiniz</span>
+                    </button>
+                </div>
+                <div class="bs-stepper-line"></div>
+                <div class="step" data-target="#demand-detail-form">
+                    <button type="button" class="step-trigger" role="tab" id="demand-detail-form-trigger" aria-controls="demand-detail-form" aria-selected="false" disabled="disabled">
+                        <span class="bs-stepper-circle">2</span>
+                        <span class="bs-stepper-label">İşlem Bilgileri Giriniz</span>
+                    </button>
+                </div>
+                <div class="bs-stepper-line"></div>
+                <div class="step" data-target="#demand-confirmation">
+                    <button type="button" class="step-trigger" role="tab" id="demand-confirmation-trigger" aria-controls="demand-confirmation" aria-selected="false" disabled="disabled">
+                        <span class="bs-stepper-circle">3</span>
+                        <span class="bs-stepper-label">Onay</span>
+                    </button>
+                </div>
+            </div>
+            <!-- BODY STEPPER -->
+            <div class="bs-stepper-content">
+                <!-- SHEET 1 -->
+                <div id="sender-account-selection" role="tabpanel" class="bs-stepper-pane active dstepper-block" aria-labelledby="sender-account-selection-trigger">
+                    @foreach (var account in (List<AccountResponseDto>)ViewBag.UserAccounts)
+                    {
+                        <div role="button" class="d-flex justify-content-between shadow-sm rounded-3 border bg-light p-3 m-3" onclick="SelectAccountHandler('@account.Id.ToString()')">
+                            <span>
+                                Hesap Numarası: <strong>@account.AccountNo</strong>
+                            </span>
+                            <span>
+                                Bakiye: <strong class="text-primary">@account.Balance</strong>
+                            </span>
+                        </div>
+                    }
+                </div>
+                <!-- SHEET 2 -->
+                <form asp-controller="Transfer" asp-action="Demand" method="post" class="needs-validation was-validated">
+                    <div id="demand-detail-form" role="tabpanel" class="bs-stepper-pane" aria-labelledby="demand-detail-form-trigger">
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                        <div class="mb-3">
+                            <label asp-for="TransferTypeId" class="form-label" style="font-weight:700; color: #4b4b4b;">Gönderim Tipi*</label>
+                            <select asp-for="TransferTypeId" asp-items="@ViewBag.TransferTypeList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz" required></select>
+                            <span asp-validation-for="TransferTypeId" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="RecipientAccountNo" class="form-label" style="font-weight:700; color: #4b4b4b;">Alıcı Hesap Numarası*</label>
+                            <input asp-for="RecipientAccountNo" class="form-control" required onchange="RecipientChanged(this)">
+                            <span asp-validation-for="RecipientAccountNo" class="text-danger"></span>
+                            <span class="text-info" style="font-size:.8rem; font-style: italic;">Hesap numarsı 12 haneli olmalıdır.</span>
+                        </div>   
+                        <div class="mb-3">
+                            <label asp-for="RecipientUserFullName" class="form-label" style="font-weight:700; color: #4b4b4b;">Alıcı Ad Soyad Bilgisi*</label>
+                            <input asp-for="RecipientUserFullName" class="form-control" required>
+                            <span asp-validation-for="RecipientUserFullName" class="text-danger"></span>
+                            <span id="info-RecipientUserFullName" class="text-primary"></span>
+                            <span id="Alert-RecipientUserFullName" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label" style="font-weight:700; color: #4b4b4b;">Açıklama</label>
+                            <textarea asp-for="Description" class="form-control" rows="3" style="resize:none;"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Amount" class="form-label" style="font-weight:700; color: #4b4b4b;">Gönderilecek Tutar*</label>
+                            <input asp-for="Amount" class="form-control" required>
+                            <span asp-validation-for="Amount" class="text-danger"></span>
+                        </div>
+                        <input asp-for="SenderAccountId" type="hidden" class="form-control">
+                        <div class="d-flex justify-content-between gap-3 mt-4">
+                            <div class="btn btn-secondary" onclick="pageStepper.previous()">
+                                <i class="fa-solid fa-chevron-left mr-2"></i>
+                                Geri
+                            </div>
+                            <div onclick="ToConfirmationSheet()" class="btn" style="background-color: #1C72AF; color: white;">
+                                Devam
+                                <i class="fa-solid fa-chevron-right ml-2"></i>
+                            </div>       
+                        </div>
+                    </div>
+                    <!-- SHEET 3 -->
+                    <div id="demand-confirmation" role="tabpanel" class="bs-stepper-pane" aria-labelledby="demand-confirmation-trigger">
+                        <div class="border bg-light shadow-sm rounded-3 p-3">
+                            <div class="d-flex flex-column gap-3 border-bottom mb-3 pb-3">
+                                <span>Tutar: <strong id="preview_amount"></strong></span>
+                                <span>Alıcı Hesap Numarası: <strong id="preview_recipientAccountNo"></strong></span>
+                                <span>Alıcı: <strong id="preview_userName"></strong></span>
+                            </div>
+                            <h3 class="text-dark text-center my-2">İşlemi Onaylıyor musunuz?</h3>
+                        </div>
+                        <div class="d-flex justify-content-between gap-3 mt-4">
+                            <div class="btn btn-secondary" onclick="pageStepper.previous()">
+                                <i class="fa-solid fa-chevron-left mr-2"></i>
+                                Geri
+                            </div>
+                            <button type="submit" class="btn" style="background-color: #1C72AF; color: white;">
+                                Onayla
+                                <i class="fa-solid fa-chevron-right ml-2"></i>
+                            </button>
+                        </div> 
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+        var pageStepper;
+        $(document).ready(function () {
+            pageStepper = new Stepper($('.bs-stepper')[0]);
+        })
+
+        function SelectAccountHandler(accountId) {
+            console.log("Acc", accountId);
+            if (accountId != null) {
+                document.querySelector('input[name="SenderAccountId"]').value = accountId;
+                pageStepper.next();
+            }
+        }
+
+        function RecipientChanged(e) {
+            if ($(e).val().length == 12) {
+
+                $.ajax({
+                    url: "/User/FindUserAndAccount?accountNo=" + $(e).val(),
+                    type: "GET", 
+                    dataType: "json",
+                    traditional: true,
+                    contentType: "application/json; charset=utf-8",
+                    success: function (data) {
+                        $("#Alert-RecipientUserFullName").hide()
+                        $("#info-RecipientUserFullName").show()
+                        $("#info-RecipientUserFullName").text(`${data.firstName.substr(0, 3)}*** ${data.lastName.substr(0, 3)}***`)
+                    },
+                    error: function () {
+                        $("#info-RecipientUserFullName").hide()
+                        $("#Alert-RecipientUserFullName").show()
+                        $("#Alert-RecipientUserFullName").text("Sistemde bulunmayan bir Hesap Numarası girdiniz")
+                    }
+                }); 
+            }
+        }
+
+        function ToConfirmationSheet() {
+            $("#preview_amount").text(document.querySelector('input[name="Amount"]').value)
+            $("#preview_recipientAccountNo").text(document.querySelector('input[name="RecipientAccountNo"]').value)
+            $("#preview_userName").text(document.querySelector('input[name="RecipientUserFullName"]').value)
+
+            pageStepper.next()
+        }
+    </script>
+}

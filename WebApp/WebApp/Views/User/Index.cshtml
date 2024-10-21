@@ -1,0 +1,49 @@
+﻿@using Model.Dtos.User_
+@model UserResponseDto
+@{
+    ViewData["Title"] = "Profilim";
+}
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-2 pb-3" style="font-weight:700;">
+            Kullanıcı Bilgileri
+        </h2>
+    </div>
+    <div class="col-12 row border-bottom my-2 p-4">
+        <h5 class="col-6 my-2" style="font-weight:400;">
+             İsim:
+         </h5>
+        <h5 class="col-6 my-2" style="font-weight:700;">
+            @Model.FirstName
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:400;">
+            Soy İsim:
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:700;">
+            @Model.LastName
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:400;">
+            E posta Adresi:
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:700;">
+            @Model.Email
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:400;">
+            Kayıt Tarihi:
+        </h5>
+        <h5 class="col-6 my-2" style="font-weight:700;">
+            @Model.RegistrationDate
+        </h5>
+    </div>
+    <div class="col-12 d-flex px-4 py-2 justify-content-between">
+        <a asp-action="EditInformations" asp-controller="User" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #1C72AF; color: white;font-weight: 500;">
+            <i class="fa-regular fa-pen-to-square text-light mr-2"></i>
+            Bilgileri Düzenle
+        </a>
+        <a asp-action="ChangePassword" asp-controller="User" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #DEB530; color: white;font-weight: 500;">
+            <i class="fa-solid fa-key text-light mr-2"></i>
+            Şifre Değiştir
+        </a>
+    </div>
+</div>

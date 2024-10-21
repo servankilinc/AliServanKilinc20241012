@@ -18,8 +18,6 @@ public static class ServiceRegistration_Business
         // ----------------------------- Business Servicses Implemantation -----------------------------
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IAccountTypeService, AccountTypeService>();
-        services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ITransferService, TransferService>();
         services.AddScoped<ITransferTypeService, TransferTypeService>();
         services.AddScoped<IUserService, UserService>();

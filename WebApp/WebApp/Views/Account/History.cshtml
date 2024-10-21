@@ -1,0 +1,122 @@
+﻿@using WebApp.ViewModels
+@model VMAccountHistory
+@{
+    ViewData["Title"] = "Hesap Hareketleri";
+}
+<style>
+    table thead tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table tbody tr td, table tbody tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-3 pb-3" style="font-weight:700;">
+            Hesap Hareketleri
+        </h2>
+    </div>
+    <form asp-controller="Account" asp-action="History" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="col-12 d-flex justify-content-between align-items-end border-bottom mb-3">
+            <div class="d-flex align-items-end gap-3 ">
+                <div class="mb-3">
+                    <label asp-for="FilterModel.StartDate" class="form-label" style="font-weight:700; color: #4b4b4b;">Başlangıç Tarihi</label>
+                    <input asp-for="FilterModel.StartDate" type="date" class="form-control w-auto" required />
+                    <span asp-validation-for="FilterModel.StartDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FilterModel.EndDate" class="form-label" style="font-weight:700; color: #4b4b4b;">Bitiş Tarihi</label>
+                    <input asp-for="FilterModel.EndDate" type="date" class="form-control w-auto" required />
+                    <span asp-validation-for="FilterModel.EndDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3 d-flex alig-items-center gap-2"> 
+                    <label asp-for="FilterModel.Status" class="form-label" style="font-weight:700; color: #4b4b4b;">Gerçekleşme Durumu</label> 
+                    <div class="form-check form-switch">
+                        <input asp-for="FilterModel.Status" class="form-check-input" type="checkbox" role="switch" >
+                    </div>
+                    <span asp-validation-for="FilterModel.Status" class="text-danger"></span>
+                </div>
+            </div>
+
+            <input asp-for="FilterModel.AccountId" type="hidden" class="form-control" required>
+            <input asp-for="FilterModel.PageIndex" type="hidden" class="form-control" required>
+ 
+            <button type="submit" class="btn btn-sm my-2" style="background-color: #13AF54; color: white;">
+                <i class="fa-solid fa-search mr-2"></i> Ara
+            </button>
+        </div>
+    </form>
+    <table class="table table-striped border shadow-sm my-3">
+        <thead>
+            <tr>
+                <th scope="col">İşlem</th>
+                <th scope="col">Gönderim Tipi</th>
+                <th scope="col">Gönderici</th>
+                <th scope="col">Gönderici Hesap</th>
+                <th scope="col">Alıcı</th>
+                <th scope="col">Alıcı Hesap</th>
+                <th scope="col">Tutar</th>
+                <th scope="col">İşlem Tarihi</th>
+                <th scope="col">İşlem Durumu</th>
+                <th scope="col">Red Detay</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var transfer in Model.Transfers.Data)
+            {
+                <tr>
+                    <th scope="row">@(transfer.SenderUserId == Model.Account.UserId ? Html.Raw("<span class='text-danger'>Gönderim</span>") : Html.Raw("<span class='text-success'>Alım</span>"))</th>
+                    <td>@transfer.TransferType?.Name</td>
+                    <td>@transfer.SenderUser?.FirstName?.Substring(0, 3)***</td>
+                    <td>@transfer.SenderAccount?.AccountNo</td>
+                    <td>@transfer.ReceivingUser?.FirstName?.Substring(0, 3)***</td>
+                    <td>@transfer.ReceivingAccount?.AccountNo</td>
+                    <td>@transfer.Amount</td>
+                    <td>@transfer.Date.ToString("dd.MM.yyyy mm:HH")</td>
+                    <td>@(transfer.Status ? Html.Raw("<span class='text-success'>Onaylı</span>") : Html.Raw("<span class='text-danger'>Red</span>"))</td>
+                    <td>@transfer.RejectionDetailDescription</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="col-12 mt-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item @(Model.Transfers.HasPrevious ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Transfers.Page - 1))">Geri</button>
+                </li>
+                @for (int i = 0; i < Model.Transfers.PageCount; i++)
+                {
+                    if(Model.Transfers.Page == i)
+                    {
+                        <li class="page-item active" aria-current="page"><span class="page-link">@(i+1)</span></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" role="button" onclick="changePage(@i)">@(i + 1)</a></li>
+                    }
+                }
+                <li class="page-item @(Model.Transfers.HasNext ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Transfers.Page + 1))">İleri</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function changePage(page) {
+            document.querySelector('input[name="FilterModel.PageIndex"]').value = page;
+            document.querySelector('form').submit();
+        }
+    </script>
+}

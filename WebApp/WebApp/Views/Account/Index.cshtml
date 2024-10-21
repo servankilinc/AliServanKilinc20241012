@@ -1,0 +1,61 @@
+﻿@using Model.Dtos.Account_
+@model List<AccountResponseDto>
+@{
+    ViewData["Title"] = "Hesaplarım";
+}
+<style>
+    table thead tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table tbody tr td, table tbody tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-3 pb-3" style="font-weight:700;">
+            Hesaplarım
+        </h2>
+    </div>
+    <div class="col-12 d-flex flex-column">
+        <table class="table table-striped border shadow-sm">
+            <thead>
+                <tr>
+                    <th scope="col">Onay Durumu</th>
+                    <th scope="col">Hesap Numarası</th>
+                    <th scope="col">Hesap Türü</th>
+                    <th scope="col">Bakiye</th>
+                    <th scope="col">Oluşturulma Tarihi</th>
+                    <th scope="col">Hesap Hareketleri</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var account in Model)
+                {
+                    <tr>
+                        <th scope="row">@(account.IsVerified ? Html.Raw("<span class='text-success'>Onaylandı</span>") : Html.Raw("<span class='text-danger'>Onyalanmadı</span>"))</th>
+                        <td>@account.AccountNo</td>
+                        <td>@account.AccountType?.Name</td>
+                        <th scope="row">@account.Balance TL</th>
+                        <td>@account.CreatedDate.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            <a asp-action="History" asp-controller="Account" asp-route-accountId="@account.Id" class="px-2 py-1 shadow-sm" role="button" style="border-radius:0.35rem; background-color: #13AF54; color: white;">
+                                <i class="fa-solid fa-file-lines text-light"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-12 pt-4 pb-2 mt-4 border-top">
+        <a asp-action="CreateNewAccount" asp-controller="Account" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #1C72AF; color: white;font-weight: 500;">
+            <i class="fa-solid fa-circle-plus text-light"></i>
+            Yeni hesap oluştur
+        </a>
+    </div>
+</div>

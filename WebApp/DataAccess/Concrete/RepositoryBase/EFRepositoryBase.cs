@@ -78,8 +78,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return orderBy(queryable).ToList();
@@ -102,8 +102,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return orderBy(queryable).ToPaginate(page, pageSize);
@@ -176,8 +176,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return await orderBy(queryable).ToListAsync(cancellationToken);
@@ -200,8 +200,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return await orderBy(queryable).ToPaginateAsync(page, pageSize, cancellationToken);

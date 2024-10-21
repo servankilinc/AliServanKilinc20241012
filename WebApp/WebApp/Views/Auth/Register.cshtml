@@ -1,0 +1,90 @@
+﻿@using Model.Models.Auth
+@model UserRegisterRequestModel
+
+
+@{
+    Layout = "_LayoutBasic";
+}
+
+<div class="d-flex justify-content-end align-items-center" style="height:100vh; position:relative; background-color: #CBCBCB;">
+    <img src="~/bg_signup.png" style="position: absolute;height: 100%;width: 100%;object-fit: contain;" />
+    <div class="d-flex flex-column justify-content-between border border-2 shadow p-5" style="background-color: #ffffffeb; min-width:30%; min-height:60%; border-bottom-left-radius: 1rem; border-top-left-radius: 1rem; z-index: 2;">
+        <img src="~/logob.png" style="width: 40%;" />
+        <div class="d-flex flex-column gap-4">
+            <div class="d-flex justify-content-center border-bottom my-4 py-2">
+                <h1 class="text-secondary font-weight-bold">Kaydol</h1>
+            </div>
+            <form asp-controller="Auth" asp-action="Register" method="post" class="needs-validation was-validated">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="mb-3">
+                    <label asp-for="TCKNO" class="form-label" style="font-weight:700; color: #4b4b4b;">TCKNO</label>
+                    <input asp-for="TCKNO" class="form-control form-control-lg" required>                     
+                    <span asp-validation-for="TCKNO" class="text-danger"></span> 
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FirstName" class="form-label" style="font-weight:700; color: #4b4b4b;">İsim</label>
+                    <input asp-for="FirstName" class="form-control form-control-lg" required>
+                    <span asp-validation-for="FirstName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="LastName" class="form-label" style="font-weight:700; color: #4b4b4b;">Soy İsim</label>
+                    <input asp-for="LastName" class="form-control form-control-lg" required>
+                    <span asp-validation-for="LastName" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label" style="font-weight:700; color: #4b4b4b;">E-posta Adresi</label>
+                    <input asp-for="Email" type="email" class="form-control form-control-lg" required>
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label" style="font-weight:700; color: #4b4b4b;">Parola</label>
+                    <input asp-for="Password" type="text" class="form-control form-control-lg" required>
+                    <span asp-validation-for="Password" class="text-danger">@Html.Raw(ViewBag.Feedback)</span>
+                </div>
+                <button type="submit" class="btn btn-lg my-4" style="background-color: #1C72AF; color: white;">Kaydol</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+
+        function InputListener(e) {
+            var _isEmail = isEmail($(e).val());
+            if (_isEmail) {
+                $(e).attr("type", "email");
+                $(e).attr("name", "Email");
+            }
+            else {
+                $(e).attr("type", "text");
+                $(e).attr("name", "TCKNO");
+            }
+            console.log("DATA", $(e).val(), _isEmail)
+        }
+        function isEmail(email) {
+            var regex = /^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+            return regex.test(email);
+        }
+
+
+        function ShowHidePassword() {
+            if ($(this).attr("status") == "false") {
+                $("#btnShowPassword").html(`<i id="IconShow" class="fa-solid fa-eye"></i> `)
+                $("#Password").attr("type", "password");
+                $(this).attr("status", "true");
+            }
+            else {
+                $("#btnShowPassword").html(`<i id="IconHide" class="fa-solid fa-eye-slash"></i>`)
+                $(this).attr("class", "fa-solid fa-eye");
+                $("#Password").attr("type", "Text");
+                $(this).attr("status", "false");
+            }
+        };
+    </script>
+}

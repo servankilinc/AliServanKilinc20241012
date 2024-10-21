@@ -9,7 +9,8 @@ namespace Business.Abstract;
 public interface IUserService
 {
     Task<UserResponseDto> GetUserAsync(Guid userId, CancellationToken cancellationToken);
-    Task<Paginate<UserResponseDto>> GetAllAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken);
+    Task<Paginate<UserResponseDto>> GetAllByPaginationAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken);
+    Task<List<UserResponseDto>> GetAllAsync(CancellationToken cancellationToken);
     Task<UserAccountBasicModel> FindUserByAccountNoAsync(string accountNo, CancellationToken cancellationToken);
     Task UpdateUserAsync(UserUpdateDto userUpdateModel, CancellationToken cancellationToken);
 }

@@ -1,0 +1,185 @@
+﻿@using WebApp.ViewModels
+@model VMAdminPortalTransferList
+@{
+    ViewData["Title"] = "Admin Portal";
+}
+<style>
+    table thead tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table tbody tr td, table tbody tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-4 pb-3" style="font-weight:700;">
+            Son Transferler
+        </h2>
+    </div>
+    <div class="col-12 d-flex flex-column  border-bottom mb-3">
+        <form asp-controller="AdminPortal" asp-action="TransferList" method="post">
+            <div class="col-12 d-flex justify-content-between align-items-end">
+
+                <div class="mb-3">
+                    <label asp-for="FilterModel.UserId" class="form-label" style="font-weight:700; color: #4b4b4b;">Kullanıcı</label>
+                    <select asp-for="FilterModel.UserId" asp-items="@Model.UserList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz"></select>
+                    <span asp-validation-for="FilterModel.UserId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FilterModel.AccountId" class="form-label" style="font-weight:700; color: #4b4b4b;">Hesaplar</label>
+                    <select asp-for="FilterModel.AccountId" asp-items="@Model.AccountList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz"></select>
+                    <span asp-validation-for="FilterModel.AccountId" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FilterModel.TransferTypeId" class="form-label" style="font-weight:700; color: #4b4b4b;">Transfer Tipi</label>
+                    <select asp-for="FilterModel.TransferTypeId" asp-items="@Model.TransferTypeList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz"></select>
+                    <span asp-validation-for="FilterModel.TransferTypeId" class="text-danger"></span>
+                </div>
+          
+                <div class="mb-3">
+                    <label asp-for="FilterModel.StartDate" class="form-label" style="font-weight:700; color: #4b4b4b;">Başlangıç Tarihi</label>
+                    <input asp-for="FilterModel.StartDate" type="date" class="form-control w-auto" />
+                    <span asp-validation-for="FilterModel.StartDate" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="FilterModel.EndDate" class="form-label" style="font-weight:700; color: #4b4b4b;">Bitiş Tarihi</label>
+                    <input asp-for="FilterModel.EndDate" type="date" class="form-control w-auto" />
+                    <span asp-validation-for="FilterModel.EndDate" class="text-danger"></span>
+                </div>
+                <input asp-for="FilterModel.PageIndex" type="hidden" class="form-control">
+
+            </div>
+            <div class="d-flex justify-content-between mt-2">
+                <div class="mb-3 d-flex alig-items-center gap-2">
+                    <label asp-for="FilterModel.Status" class="form-label" style="font-weight:700; color: #4b4b4b;">Gerçekleşme Durumu</label>
+                    <div class="form-check form-switch">
+                        <input asp-for="FilterModel.Status" class="form-check-input" type="checkbox" role="switch">
+                    </div>
+                    <span asp-validation-for="FilterModel.Status" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-sm my-2" style="background-color: #13AF54; color: white;">
+                    <i class="fa-solid fa-search me-2"></i> Ara
+                </button>
+            </div>
+        </form>
+    </div>
+    <div class="col-12 mt-4">
+        <table class="table table-striped border shadow-sm my-3">
+            <thead>
+                <tr>
+                    <th scope="col">Gönderim Tipi</th>
+                    <th scope="col">Gönderici</th>
+                    <th scope="col">Gönderici Hesap</th>
+                    <th scope="col">Alıcı</th>
+                    <th scope="col">Alıcı Hesap</th>
+                    <th scope="col">Tutar</th>
+                    <th scope="col">İşlem Tarihi</th>
+                    <th scope="col">İşlem Durumu</th>
+                    @if (!Model.FilterModel.Status)
+                    {
+                        <th scope="col">Red Detay</th>
+                    }
+                    @if (Model.FilterModel.Status)
+                    {
+                        <th scope="col">Transfer Reddet</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transfer in Model.Transfers.Data)
+                {
+                    <tr>
+                        <td>@transfer.TransferType?.Name</td>
+                        <td>@transfer.SenderUser?.FirstName?.Substring(0, 3)***</td>
+                        <td>@transfer.SenderAccount?.AccountNo</td>
+                        <td>@transfer.ReceivingUser?.FirstName?.Substring(0, 3)***</td>
+                        <td>@transfer.ReceivingAccount?.AccountNo</td>
+                        <td>@transfer.Amount</td>
+                        <td>@transfer.Date.ToString("dd.MM.yyyy mm:HH")</td>
+                        <td>@(transfer.Status ? Html.Raw("<span class='text-success'>Onaylı</span>") : Html.Raw("<span class='text-danger'>Red</span>"))</td>
+                        @if (!Model.FilterModel.Status)
+                        {
+                            <td>@transfer.RejectionDetailDescription</td>
+                        }
+                        @if (Model.FilterModel.Status)
+                        {
+                            <td>
+                                <div class="btn btn-danger btn-sm shadow-sm" onclick="ShowAlertRejection('@(transfer.Id)')">
+                                    Reddet
+                                </div>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-12 mt-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item @(Model.Transfers.HasPrevious ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Transfers.Page - 1))">Geri</button>
+                </li>
+                @for (int i = 0; i < Model.Transfers.PageCount; i++)
+                {
+                    if (Model.Transfers.Page == i)
+                    {
+                        <li class="page-item active" aria-current="page"><span class="page-link">@(i + 1)</span></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" role="button" onclick="changePage(@i)">@(i + 1)</a></li>
+                    }
+                }
+                <li class="page-item @(Model.Transfers.HasNext ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Transfers.Page + 1))">İleri</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" id="modal-transfer-rejection">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body d-flex flex-column gap-2 text-center p-3">
+                <i class="fa-solid fa-triangle-exclamation fa-2xl text-warning"></i>
+                <b class="h5 text-secondary mt-3">Transfer işlemini Red etmek istiyor musunuz?</b>
+                <form asp-controller="Transfer" asp-action="Rejection" method="post" id="transfer-rejection-form" class="d-flex flex-column p-2 pt-3 m-2 border-top">
+                    <label for="Description" class="form-label align-self-start" style="font-weight:700; color: #4b4b4b;">
+                        Açıklama
+                    </label>
+                    <textarea name="Description" placeholder="Açıklama girebilirsiniz" class="form-control" rows="3" style="resize:none;"></textarea>
+                    <input name="TransferId" type="hidden" class="form-control">
+                    <div class="d-flex justify-content-center my-2">
+                        <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">İptal</button>
+                        <button role="button" type="submit" class="btn btn-danger shadow-sm ms-3">Reddet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function changePage(page) {
+            document.querySelector('input[name="FilterModel.PageIndex"]').value = page;
+            document.querySelector('form').submit();
+        }
+
+        function ShowAlertRejection(tID) {
+            if (tID != null) {
+                document.querySelector('#transfer-rejection-form textarea[name="Description"]').value = ""
+                document.querySelector('#transfer-rejection-form input[name="TransferId"]').value = tID
+                $("#modal-transfer-rejection").modal("show");
+            }
+        }
+    </script>
+}

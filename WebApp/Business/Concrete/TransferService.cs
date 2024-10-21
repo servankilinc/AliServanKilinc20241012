@@ -29,6 +29,7 @@ public class TransferService : ITransferService
         var paginatedList = await _transferRepository.GetPaginatedListAsync(
             filter: requestModel.Filter?? default,
             sort: requestModel.Sort?? default,
+            where: t => t.SenderAccountId == requestModel.AccountId || t.RecipientAccountId == requestModel.AccountId,
             include: t => t
                 .Include(t => t.TransferType!)
                 .Include(t => t.SenderAccount!)
@@ -68,7 +69,54 @@ public class TransferService : ITransferService
             PageCount = paginatedList.PageCount
         };
     }
-     
+
+
+    public async Task<Paginate<TransferDetailModel>> GetTransfers(TransferListRequestModel requestModel, CancellationToken cancellationToken)
+    {
+        var paginatedList = await _transferRepository.GetPaginatedListAsync(
+            filter: requestModel.Filter ?? default,
+            include: t => t
+                .Include(t => t.TransferType!)
+                .Include(t => t.SenderAccount!)
+                .Include(t => t.ReceivingAccount!)
+                .Include(t => t.SenderUser!)
+                .Include(t => t.ReceivingUser!),
+            page: requestModel.PagingRequest!.Page,
+            pageSize: requestModel.PagingRequest.PageSize,
+            cancellationToken: cancellationToken);
+
+        var mappedData = paginatedList.Data.Select(transfer => new TransferDetailModel
+        {
+            Id = transfer.Id,
+            TransferTypeId = transfer.TransferTypeId,
+            SenderAccountId = transfer.SenderAccountId,
+            RecipientAccountId = transfer.RecipientAccountId,
+            SenderUserId = transfer.SenderUserId,
+            RecipientUserId = transfer.RecipientUserId,
+            Date = transfer.Date,
+            Status = transfer.Status,
+            RejectionDetailDescription = transfer.RejectionDetailDescription,
+            Amount = transfer.Amount,
+            Description = transfer.Description,
+
+            TransferType = _mapper.Map<TransferTypeResponseDto>(transfer.TransferType),
+            SenderAccount = _mapper.Map<AccountResponseDto>(transfer.SenderAccount),
+            ReceivingAccount = _mapper.Map<AccountResponseDto>(transfer.ReceivingAccount),
+            SenderUser = _mapper.Map<UserResponseDto>(transfer.SenderUser),
+            ReceivingUser = _mapper.Map<UserResponseDto>(transfer.ReceivingUser)
+        }).ToList();
+
+        return new Paginate<TransferDetailModel>
+        {
+            Data = mappedData,
+            DataCount = paginatedList.DataCount,
+            Page = paginatedList.Page,
+            PageSize = paginatedList.PageSize,
+            PageCount = paginatedList.PageCount
+        };
+    }
+
+
     public async Task SendTransferRequestAsync(TransferRequestModel requestModel, CancellationToken cancellationToken)
     {
         Account recipientAccount = await _accountRepository.GetAsync(filter: a => a.AccountNo == requestModel.RecipientAccountNo, cancellationToken: cancellationToken);
@@ -96,6 +144,7 @@ public class TransferService : ITransferService
         };
         await _transferRepository.ApplyTransferAsync(transferToInsert, senderAccount, recipientAccount, cancellationToken); 
     }
+
 
     public async Task RejectTransferAsync(TransferRejectRequestModel rejectModel, CancellationToken cancellationToken)
     {

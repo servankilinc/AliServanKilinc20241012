@@ -1,0 +1,93 @@
+﻿@using WebApp.ViewModels
+@model VMAdminPortalUserList
+@{
+    ViewData["Title"] = "Admin Portal";
+}
+<style>
+    table thead tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    table tbody tr td, table tbody tr th {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-4 pb-3" style="font-weight:700;">
+            Kullanıcılar
+        </h2>
+    </div>
+    <div class="col-12 d-flex flex-column">
+        <form asp-controller="AdminPortal" asp-action="UserList" method="post">
+            <div class="col-12 d-flex justify-content-between align-items-end">
+                <input asp-for="FilterModel.PageIndex" type="hidden" class="form-control">
+            </div>
+        </form>
+    </div>
+    <div class="col-12 mt-4">
+        <table class="table table-striped border shadow-sm my-3">
+            <thead>
+                <tr>
+                    <th scope="col">İsim</th>
+                    <th scope="col">Soy isim</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Kayıt Tarihi</th>
+                    <th scope="col">Kullanıcı Hesapları</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in Model.Users!.Data)
+                {
+                    <tr>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>@user.RegistrationDate.ToString("dd.MM.yyyy mm:HH")</td>
+                        <td>
+                            <a asp-controller="Account" asp-action="UserAccounts" asp-route-userId="@user.Id" class="btn btn-success btn-sm shadow-sm">
+                                <i class="fa-solid fa-credit-card text-light" />
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-12 mt-4">
+        <nav class="d-flex justify-content-center">
+            <ul class="pagination">
+                <li class="page-item @(Model.Users.HasPrevious ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Users.Page - 1))">Geri</button>
+                </li>
+                @for (int i = 0; i < Model.Users.PageCount; i++)
+                {
+                    if (Model.Users.Page == i)
+                    {
+                        <li class="page-item active" aria-current="page"><span class="page-link">@(i + 1)</span></li>
+                    }
+                    else
+                    {
+                        <li class="page-item"><a class="page-link" role="button" onclick="changePage(@i)">@(i + 1)</a></li>
+                    }
+                }
+                <li class="page-item @(Model.Users.HasNext ? "" : "disabled")">
+                    <button type="button" class="page-link" onclick="changePage(@(Model.Users.Page + 1))">İleri</button>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function changePage(page) {
+            document.querySelector('input[name="FilterModel.PageIndex"]').value = page;
+            document.querySelector('form').submit();
+        }
+    </script>
+}

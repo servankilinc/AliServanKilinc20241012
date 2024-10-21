@@ -1,0 +1,88 @@
+﻿@using System.Security.Claims
+@{
+    bool isAuthenticated = User.Identity != null && User.Identity.IsAuthenticated;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - WebApp</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link href="~/lib/fontawesome-6.5.2/fontawesome-free-6.5.2-web/css/all.min.css" rel="stylesheet" />
+    <link href="~/lib/bootstrap-select-1.13.14/dist/bootstrap-select.min.css" rel="stylesheet" />
+    <link href="~/lib/bs-stepper/dist/bs-stepper.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/WebApp.styles.css" asp-append-version="true" />
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/logob.png" style="width: 50%;"/>
+                </a>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 p-2 m-2 justify-content-end">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="AdminPortal" asp-action="Index">Admin Portal</a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Account" asp-action="Index">Hesaplarım</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Profilim</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Auth" asp-action="Logout">Çıkış Yap</a>
+                        </li>
+                    </ul>
+                </div>
+                @if (isAuthenticated)
+                {
+                    <div class="rounded-3 border ms-3 p-2 bg-light shadow-sm">
+                        <i class="fa-solid fa-user fa-2xl text-secondary"></i>
+                        <span class="text-secondary">
+                            @User.Claims.FirstOrDefault(f => f.Type == ClaimTypes.Email)?.Value
+                        </span>
+                    </div>
+                }
+                else
+                {
+                    <a asp-action="Login" asp-controller="Auth" >
+                        <button type="button" class="btn btn-light shadow-sm mx-4 border">Giriş Yap</button>
+                    </a>
+                }
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2024 - WebApp - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+        </div>
+    </footer>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/lib/fontawesome-6.5.2/fontawesome-free-6.5.2-web/js/all.min.js"></script>
+    <script src="~/lib/bootstrap-select-1.13.14/dist/bootstrap-select.min.js"></script>
+    <script src="~/lib/bs-stepper/dist/bs-stepper.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

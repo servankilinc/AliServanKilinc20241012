@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Business.Abstract;
+using Core.DataAccess.Pagination;
 using Core.Exceptions;
 using DataAccess.Abstract;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Model.Dtos.Account_;
 using Model.Dtos.AccountType_;
 using Model.Entities;
 using Model.Models.Account_;
+using Model.Models.User_;
 
 namespace Business.Concrete;
 
@@ -18,6 +20,52 @@ public class AccountService : IAccountService
     {
         _accountRepository = accountRepository;
         _mapper = mapper;
+    }
+
+
+    public async Task<AccountResponseDto> GetAccountAsync(Guid accountId, CancellationToken cancellationToken = default)
+    {
+        Account account = await _accountRepository.GetAsync(filter: a => a.Id == accountId, cancellationToken: cancellationToken);
+        return _mapper.Map<AccountResponseDto>(account);
+    }
+    
+
+    public async Task<List<AccountResponseDto>> GetAllAsync(CancellationToken cancellationToken = default)
+    {
+        var list = await _accountRepository.GetAllAsync(cancellationToken: cancellationToken);
+        return list.Select(_mapper.Map<AccountResponseDto>).ToList();
+    }
+
+
+    public async Task<Paginate<AccountResponseDto>> GetAllByPaginationAsync(AccountListRequestModel requestModel, CancellationToken cancellationToken = default)
+    {
+        Paginate<Account> paginated = await _accountRepository.GetPaginatedListAsync(
+            include: a => a.Include(i => i.AccountType!),
+            filter: requestModel.Filter ?? default,
+            sort: requestModel.Sort ?? default,
+            page: requestModel.PagingRequest!.Page,
+            pageSize: requestModel.PagingRequest.PageSize
+        );
+
+        return new Paginate<AccountResponseDto>
+        {
+            Data = paginated.Data.Select(a => new AccountResponseDto()
+            {
+                AccountNo = a.AccountNo,
+                AccountType = _mapper.Map<AccountTypeResponseDto>(a.AccountType),
+                UserId = a.UserId,
+                AccountTypeId = a.AccountTypeId,
+                Balance = a.Balance,
+                CreatedDate = a.CreatedDate,
+                Id = a.Id,
+                IsVerified = a.IsVerified,
+                VerificationDate = a.VerificationDate
+            }).ToList(),
+            DataCount = paginated.DataCount,
+            Page = paginated.Page,
+            PageCount = paginated.PageCount,
+            PageSize = paginated.PageSize
+        };
     }
 
 

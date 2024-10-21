@@ -1,0 +1,41 @@
+﻿@using Model.Dtos.User_
+@model UserUpdateDto
+@{
+    ViewData["Title"] = "Bilgileri Güncelle";
+}
+
+<div class="row shadow-sm p-3" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+    <div class="col-12">
+        <h2 class="border-bottom mb-2 pb-2" style="font-weight:700;">
+            Kullanıcı Bilgileri Güncelle
+        </h2>
+    </div>
+    <div class="col-12">
+        <form asp-controller="User" asp-action="EditInformations" method="post" class="needs-validation was-validated">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="FirstName" class="form-label" style="font-weight:700; color: #4b4b4b;">İsim</label>
+                <input asp-for="FirstName" class="form-control" required>
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="LastName" class="form-label" style="font-weight:700; color: #4b4b4b;">Soy İsim</label>
+                <input asp-for="LastName" class="form-control" required>
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label" style="font-weight:700; color: #4b4b4b;">E posta Adresi</label>
+                <input asp-for="Email" class="form-control" required>
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div> 
+            <button type="submit" class="btn my-2" style="background-color: #13AF54; color: white;">
+                <i class="fa-regular fa-circle-check mr-2"></i>
+                Onayla
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

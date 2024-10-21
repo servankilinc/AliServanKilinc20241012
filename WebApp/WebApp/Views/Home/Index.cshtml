@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+} 
+@using Model.Models.Account_
+@model List<AccountByLastTransfersModel>
+
+@foreach (var accountModel in Model)
+{
+    <div class="row shadow-sm bg-light p-3 my-4" style="border-radius: 1rem; border: 1px solid #e2e2e2;">
+        <div class="col-8 d-flex flex-column gap-2">
+            <span class="" style="font-weight: 300;">
+                Hesap Numarası:
+                <span class="text-secondary" style="font-weight: 700;">
+                    @accountModel.Account?.AccountNo
+                </span>
+            </span>
+            <span class="" style="font-weight: 300;">
+                Hesap Türü:
+                <span class="text-secondary" style="font-weight: 700;">
+                    @accountModel.Account?.AccountType?.Name
+                </span>
+            </span>
+
+            <span class="" style="font-weight: 300;">
+                Bakiye:
+                <span class="text-secondary" style="font-weight: 700;">
+                    @accountModel.Account?.Balance
+                </span>
+            </span>
+
+            <span class="" style="font-weight: 300;">
+                Hesap Oluşturma Tarihi
+                <span class="text-secondary" style="font-weight: 700;">
+                    @accountModel.Account?.CreatedDate.ToString("dd.MM.yyyy")
+                </span>
+            </span>
+        </div>
+        <div class="col-4 d-flex flex-column">
+            <h6 class="text-center text-secondary pb-2 mb-2" style="border-bottom: 1px solid #efefef !important; font-weight: 700;">
+                Son İşlemler
+            </h6>
+            @if (accountModel.Transfers is not null)
+            {
+                foreach (var transfer in accountModel.Transfers)
+                {
+                    <div class="row align-items-center">
+                        <span class="col-6 text-end @(@transfer.IsUserSender ? "text-danger": "text-success")" style="font-weight: 600;">
+                            @if (transfer.IsUserSender)
+                            {
+                                <i class="fa-solid fa-minus text-danger fa-2xs"></i>
+                            }
+                            else
+                            {
+                                <i class="fa-solid fa-plus text-success fa-2xs"></i>
+                            }
+                            @transfer.Amount
+                        </span>
+                        <span class="col-6" style="font-size:0.8rem; font-weight: 300;">
+                            @transfer.Date.ToString("dd.MM.yyyy mm:HH")
+                        </span>
+                    </div>
+                }
+            }
+        </div>
+        <div class="col-12 pt-4 pb-2 mt-4 border-top">
+            <a asp-action="Demand" asp-controller="Transfer" asp-route-accountId="@accountModel.Account?.Id" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #1C72AF; color: white;font-weight: 500;">
+                <i class="fa-solid fa-share-from-square text-light"></i>
+                Para Transferi
+            </a>
+            <a asp-action="History" asp-controller="Account" asp-route-accountId="@accountModel.Account?.Id" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #13AF54; color: white;font-weight: 500;">
+                <i class="fa-solid fa-file-lines text-light"></i>
+                Hesap Hareketleri
+            </a>
+        </div>
+    </div>
+}

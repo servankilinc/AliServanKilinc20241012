@@ -8,6 +8,7 @@ using Model.Dtos.User_;
 using Model.Entities;
 using Model.Models.Account_;
 using Model.Models.User_;
+using System.Collections.Generic;
 
 namespace Business.Concrete;
 
@@ -44,7 +45,7 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<Paginate<UserResponseDto>> GetAllAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken)
+    public async Task<Paginate<UserResponseDto>> GetAllByPaginationAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken)
     {
         Paginate<User> paginated = await _userRepository.GetPaginatedListAsync(
             filter: userListRequestModel.Filter?? default,
@@ -61,6 +62,13 @@ public class UserService : IUserService
             PageCount = paginated.PageCount,
             PageSize = paginated.PageSize
         };
+    }
+
+    public async Task<List<UserResponseDto>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var list = await _userRepository.GetAllAsync();
+
+        return list.Select(_mapper.Map<UserResponseDto>).ToList();
     }
 
     public async Task<UserResponseDto> GetUserAsync(Guid userId, CancellationToken cancellationToken)

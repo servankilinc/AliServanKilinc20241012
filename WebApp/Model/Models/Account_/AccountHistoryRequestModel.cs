@@ -3,7 +3,6 @@ using Core.DataAccess.Pagination;
 using FluentValidation;
 
 namespace Model.Models.Account_;
-
 public class AccountHistoryRequestModel
 {
     public Guid AccountId { get; set; }
