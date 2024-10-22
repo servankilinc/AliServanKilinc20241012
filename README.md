@@ -9,8 +9,8 @@ Bu proje, .NET teknolojileri kullanılarak geliştirilmiş çok katmanlı bir mi
 * Authentication ve Authorization – Api kullanımı için JWT token ve MVC Uygulaması için Cookie, Role bazlı yapılar kullanıldı
 * MSSQL Server – Veritabanı yönetim sistemi
 * FluentValidation – Validasyon işlemleri için
+* AutoMapper – DTO ve entity dönüşümleri için
 * Repository Pattern – Veri erişim katmanı için
-* Distributed Dache – Cache Kullanımı içi
 * Javascript & Jquery - ajax, dom manipülasyonları vb. için
 * HTML & Css & Bootstrap - Web MVC uygulaması arayüz tasarımlarında kullanıldı
 
