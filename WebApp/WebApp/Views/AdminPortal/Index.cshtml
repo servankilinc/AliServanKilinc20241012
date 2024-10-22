@@ -1,7 +1,77 @@
-﻿
-<a asp-action="TransferList" asp-controller="AdminPortal">
-    Para Transferleri
-</a>
-<a asp-action="AccountList" asp-controller="AdminPortal">
-    Hesaplar
-</a>
+﻿<style>
+        .small-box {
+            position:relative;
+            border-radius: .25rem;
+            box-shadow: 0 0 1px rgba(0,0,0,.125),0 1px 3px rgba(0,0,0,.2);
+            display: block;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .small-box > .inner{
+            padding: 20px;
+        }
+                
+        .small-box > .icon{
+            position: absolute;
+            right: 10%;
+            top: 20%;
+        }
+ 
+        .small-box > .small-box-footer{
+            background-color: rgba(0,0,0,.1);
+            color: rgba(255,255,255,.8);
+            display: block;
+            padding: 8px 0;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+            z-index: 10;
+            margin-top: 10px;
+        }
+</style>
+
+  
+<div class="row my-5">
+    <div class="col-lg-4 col-12">
+        <div class="small-box bg-primary">
+            <div class="inner text-light">
+                <h3>Para Transferleri</h3>
+                <p class="text-light" style="font-size:.8rem;">Toplam Transfer <b>@ViewBag.TransferCount</b></p>
+            </div>
+            <div class="icon" style="">
+                <i class="fa-solid fa-money-bill-transfer text-light" style="font-size:3rem;"></i>
+            </div>
+            <a asp-action="TransferList" asp-controller="AdminPortal" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right ms-2"></i></a>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-12">
+
+        <div class="small-box bg-success">
+            <div class="inner text-light">
+                <h3>Kullanıcılar</h3>
+                <p class="text-light" style="font-size:.8rem;">Toplam kullanıcı <b>@ViewBag.UserCount</b></p>
+            </div>
+            <div class="icon">
+                <i class="fa-solid fa-user text-light" style="font-size:3rem;"></i>
+            </div>
+            <a asp-action="UserList" asp-controller="AdminPortal" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right ms-2"></i></a>
+        </div>
+    </div>
+
+    <div class="col-lg-4 col-12">
+
+        <div class="small-box bg-warning">
+            <div class="inner text-secondary">
+                <h3>Hesaplar</h3>
+                <p class="text-secondary" style="font-size:.8rem;">Toplam Hesap <b>@ViewBag.AccountCount</b></p>
+            </div>
+            <div class="icon">
+                <i class="fa-solid fa-file-invoice-dollar text-light" style="font-size:3rem;"></i>
+            </div>
+            <a asp-action="AccountList" asp-controller="AdminPortal" class="small-box-footer">Daha fazla bilgi <i class="fas fa-arrow-circle-right ms-2"></i></a>
+        </div>
+    </div>
+
+</div>

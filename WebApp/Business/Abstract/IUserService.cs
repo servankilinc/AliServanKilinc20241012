@@ -8,6 +8,7 @@ namespace Business.Abstract;
 
 public interface IUserService
 {
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
     Task<UserResponseDto> GetUserAsync(Guid userId, CancellationToken cancellationToken);
     Task<Paginate<UserResponseDto>> GetAllByPaginationAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken);
     Task<List<UserResponseDto>> GetAllAsync(CancellationToken cancellationToken);

@@ -35,13 +35,6 @@ public class AccountController : Controller
         return View(userAccounts);
     }
 
-    public async Task<IActionResult> UserAccounts(Guid userId)
-    {
-        ViewBag.UserId = userId;
-        var userAccounts = await _accountService.GetUserAccountsAsync(userId, new CancellationToken());
-        return View(userAccounts);
-    }
-
 
     public async Task<IActionResult> CreateNewAccount()
     {

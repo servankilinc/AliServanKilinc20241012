@@ -10,24 +10,24 @@
         <!-- STEPPER -->
         <div id="transfer_stepper" class="bs-stepper linear">
             <!-- HEADER STEPPER -->
-            <div class="bs-stepper-header border-bottom mb-4 pb-2" role="tablist">
-                <div class="step active" data-target="#sender-account-selection">
+            <div class="bs-stepper-header mb-4 pb-2" role="tablist">
+@*                 <div class="step active" data-target="#sender-account-selection">
                     <button type="button" class="step-trigger" role="tab" id="sender-account-selection-trigger" aria-controls="sender-account-selection" aria-selected="true">
                         <span class="bs-stepper-circle">1</span>
                         <span class="bs-stepper-label">Gönderim Yapılcak Hesabı Seçiniz</span>
                     </button>
-                </div>
+                </div> *@
                 <div class="bs-stepper-line"></div>
                 <div class="step" data-target="#demand-detail-form">
                     <button type="button" class="step-trigger" role="tab" id="demand-detail-form-trigger" aria-controls="demand-detail-form" aria-selected="false" disabled="disabled">
-                        <span class="bs-stepper-circle">2</span>
+                        <span class="bs-stepper-circle">1</span>
                         <span class="bs-stepper-label">İşlem Bilgileri Giriniz</span>
                     </button>
                 </div>
                 <div class="bs-stepper-line"></div>
                 <div class="step" data-target="#demand-confirmation">
                     <button type="button" class="step-trigger" role="tab" id="demand-confirmation-trigger" aria-controls="demand-confirmation" aria-selected="false" disabled="disabled">
-                        <span class="bs-stepper-circle">3</span>
+                        <span class="bs-stepper-circle">2</span>
                         <span class="bs-stepper-label">Onay</span>
                     </button>
                 </div>
@@ -35,10 +35,10 @@
             <!-- BODY STEPPER -->
             <div class="bs-stepper-content">
                 <!-- SHEET 1 -->
-                <div id="sender-account-selection" role="tabpanel" class="bs-stepper-pane active dstepper-block" aria-labelledby="sender-account-selection-trigger">
+@*                 <div id="sender-account-selection" role="tabpanel" class="bs-stepper-pane active dstepper-block" aria-labelledby="sender-account-selection-trigger">
                     @foreach (var account in (List<AccountResponseDto>)ViewBag.UserAccounts)
                     {
-                        <div role="button" class="d-flex justify-content-between shadow-sm rounded-3 border bg-light p-3 m-3" onclick="SelectAccountHandler('@account.Id.ToString()')">
+                        <div role="button" class="d-flex justify-content-between shadow-sm rounded-3 border bg-light p-3 m-3" onclick="SelectAccountHandler('@account.Id.ToString()', '@account.Balance.ToString()')">
                             <span>
                                 Hesap Numarası: <strong>@account.AccountNo</strong>
                             </span>
@@ -47,7 +47,7 @@
                             </span>
                         </div>
                     }
-                </div>
+                </div> *@
                 <!-- SHEET 2 -->
                 <form asp-controller="Transfer" asp-action="Demand" method="post" class="needs-validation was-validated">
                     <div id="demand-detail-form" role="tabpanel" class="bs-stepper-pane" aria-labelledby="demand-detail-form-trigger">
@@ -129,10 +129,11 @@
             pageStepper = new Stepper($('.bs-stepper')[0]);
         })
 
-        function SelectAccountHandler(accountId) {
+        function SelectAccountHandler(accountId, balance) {
             console.log("Acc", accountId);
             if (accountId != null) {
                 document.querySelector('input[name="SenderAccountId"]').value = accountId;
+                $('input[name="SenderAccountId"]').attr("max", balance);
                 pageStepper.next();
             }
         }

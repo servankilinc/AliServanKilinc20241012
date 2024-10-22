@@ -29,17 +29,17 @@ public class TransferController : Controller
     }
 
 
-    public async Task<IActionResult> Demand()
+    public async Task<IActionResult> Demand(Guid accountId)
     {
-        Claim? nameId = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-        if (nameId == null) return RedirectToAction("Login", "Auth");
-
-        var transferTypeList = await _transferTypeService.GetTransferTypeListAsync(new CancellationToken());
-
-        ViewBag.UserAccounts = await _accountService.GetUserAccountsAsync(Guid.Parse(nameId.Value), new CancellationToken());
+        var requestModel =  new TransferRequestModel()
+        {
+            SenderAccountId = accountId,
+            Amount = 0,
+        };
+        var transferTypeList = await _transferTypeService.GetTransferTypeListAsync(new CancellationToken());         
         ViewBag.TransferTypeList = transferTypeList.Select(d => new SelectListItem(d.Name, d.Id.ToString())).ToList();
 
-        return View();
+        return View(requestModel);
     }
 
     [HttpPost]

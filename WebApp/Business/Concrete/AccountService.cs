@@ -6,9 +6,9 @@ using DataAccess.Abstract;
 using Microsoft.EntityFrameworkCore;
 using Model.Dtos.Account_;
 using Model.Dtos.AccountType_;
+using Model.Dtos.User_;
 using Model.Entities;
 using Model.Models.Account_;
-using Model.Models.User_;
 
 namespace Business.Concrete;
 
@@ -20,6 +20,13 @@ public class AccountService : IAccountService
     {
         _accountRepository = accountRepository;
         _mapper = mapper;
+    }
+
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _accountRepository.CountAsync(cancellationToken: cancellationToken);
+        return result;
     }
 
 
@@ -37,22 +44,23 @@ public class AccountService : IAccountService
     }
 
 
-    public async Task<Paginate<AccountResponseDto>> GetAllByPaginationAsync(AccountListRequestModel requestModel, CancellationToken cancellationToken = default)
+    public async Task<Paginate<AccountWithUserResponseDto>> GetAllByPaginationAsync(AccountListRequestModel requestModel, CancellationToken cancellationToken = default)
     {
         Paginate<Account> paginated = await _accountRepository.GetPaginatedListAsync(
-            include: a => a.Include(i => i.AccountType!),
+            include: a => a.Include(i => i.AccountType!).Include(i => i.User!),
             filter: requestModel.Filter ?? default,
             sort: requestModel.Sort ?? default,
             page: requestModel.PagingRequest!.Page,
             pageSize: requestModel.PagingRequest.PageSize
         );
 
-        return new Paginate<AccountResponseDto>
+        return new Paginate<AccountWithUserResponseDto>
         {
-            Data = paginated.Data.Select(a => new AccountResponseDto()
+            Data = paginated.Data.Select(a => new AccountWithUserResponseDto()
             {
                 AccountNo = a.AccountNo,
                 AccountType = _mapper.Map<AccountTypeResponseDto>(a.AccountType),
+                User = _mapper.Map<UserResponseDto>(a.User),
                 UserId = a.UserId,
                 AccountTypeId = a.AccountTypeId,
                 Balance = a.Balance,

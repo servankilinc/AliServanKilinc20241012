@@ -23,17 +23,17 @@
     </div>
     <div class="col-12 d-flex flex-column  border-bottom mb-3">
         <form asp-controller="AdminPortal" asp-action="AccountList" method="post">
-            <div class="col-12 d-flex justify-content-between align-items-end">
+            <div class="row d-flex justify-content-between align-items-end">
 
-                <div class="mb-3">
+                <div class="col-sm-4 mb-3">
                     <label asp-for="FilterModel.AccountNo" class="form-label" style="font-weight:700; color: #4b4b4b;">Hesap Numarası</label>
                     <input asp-for="FilterModel.AccountNo" class="form-control" />
                 </div>
-                <div class="mb-3">
+                <div class="col-sm-4 mb-3">
                     <label asp-for="FilterModel.UserId" class="form-label" style="font-weight:700; color: #4b4b4b;">Kullanıcı</label>
                     <select asp-for="FilterModel.UserId" asp-items="@Model.UserList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz"></select>
                 </div>
-                <div class="mb-3">
+                <div class="col-sm-4 mb-3">
                     <label asp-for="FilterModel.AccountTypeId" class="form-label" style="font-weight:700; color: #4b4b4b;">Hesap Türü</label>
                     <select asp-for="FilterModel.AccountTypeId" asp-items="@Model.AccountTypeList" class="selectpicker" data-width="100%" data-live-search="true" data-size="5" data-style="btn-outline-secondary" title="Seçiniz"></select>
                 </div>
@@ -47,7 +47,7 @@
             </div>
         </form>
     </div>
-    <div class="col-12 mt-4">
+    <div class="col-12 mt-4 overflow-auto">
         <table class="table table-striped border shadow-sm my-3">
             <thead>
                 <tr>
@@ -58,7 +58,7 @@
                     <th scope="col">Onay Durumu</th>
                     <th scope="col">Onay Tarihi</th>
                     <th scope="col">Bakiye</th>
-                    <th scope="col">Devre Dışı Bırak</th>
+                    <th scope="col">Erişim Engeli Kontrol</th>
                 </tr>
             </thead>
             <tbody>
@@ -67,19 +67,25 @@
                     <tr>
                         <td>@account.AccountNo</td>
                         <td>@account.AccountType?.Name</td>
-                        <td>@account.UserId</td>
+                        <td>@account.User!.FirstName @account.User!.LastName</td>
                         <td>@account.CreatedDate.ToString("dd.MM.yyyy mm:HH")</td>
                         <td>@(account.IsVerified? Html.Raw("<span class='text-success'>Onaylı</span>") : Html.Raw("<span class='text-danger'>Red</span>"))</td>
                         <td>@account.VerificationDate.ToString("dd.MM.yyyy mm:HH")</td>
                         <td>@account.Balance</td>
-                        @if (account.IsVerified)
-                        {
-                            <td>
-                                <div class="btn btn-danger btn-sm shadow-sm" onclick="ShowAlertRejection('@(account.Id)')">
-                                    Reddet
+                        <td>
+                            @if (account.IsVerified)
+                            {
+                                <div class="btn btn-danger btn-sm shadow-sm" onclick="ShowAlertRemoveAccountVerification('@(account.Id)')">
+                                    <i class="fa-solid fa-lock"></i>
+                                </div> 
+                            }
+                            @if (!account.IsVerified)
+                            { 
+                                <div class="btn btn-success btn-sm shadow-sm" onclick="ShowAlertAccountVerification('@(account.Id)')">
+                                    <i class="fa-solid fa-lock-open"></i>
                                 </div>
-                            </td>
-                        }
+                            }
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -116,11 +122,29 @@
             <div class="modal-body d-flex flex-column gap-2 text-center p-3">
                 <i class="fa-solid fa-triangle-exclamation fa-2xl text-warning"></i>
                 <b class="h5 text-secondary mt-3">Hesabı devre dışı bırakmak istiyor musunuz?</b>
-                <form asp-controller="AdminPortal" asp-action="Rejection" method="post" id="account-rejection-form" class="d-flex flex-column p-2 pt-3 m-2 border-top">
+                <form asp-controller="AdminPortal" asp-action="RemoveVerification" method="get" id="account-rejection-form" class="d-flex flex-column p-2 pt-3 m-2 border-top">
                     <input name="AccountId" type="hidden" class="form-control">
                     <div class="d-flex justify-content-center my-2">
                         <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">İptal</button>
-                        <button role="button" type="submit" class="btn btn-danger shadow-sm ms-3">Reddet</button>
+                        <button role="button" type="submit" class="btn btn-danger shadow-sm ms-3">Onayla</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" tabindex="-1" id="modal-account-verify">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body d-flex flex-column gap-2 text-center p-3">
+                <i class="fa-solid fa-triangle-exclamation fa-2xl text-warning"></i>
+                <b class="h5 text-secondary mt-3">Hesabı erişime açmak istiyor musunuz?</b>
+                <form asp-controller="AdminPortal" asp-action="Verify" method="get" id="account-verify-form" class="d-flex flex-column p-2 pt-3 m-2 border-top">
+                    <input name="AccountId" type="hidden" class="form-control">
+                    <div class="d-flex justify-content-center my-2">
+                        <button type="button" class="btn btn-secondary shadow-sm" data-bs-dismiss="modal">İptal</button>
+                        <button role="button" type="submit" class="btn btn-success shadow-sm ms-3">Onayla</button>
                     </div>
                 </form>
             </div>
@@ -136,11 +160,17 @@
             document.querySelector('form').submit();
         }
 
-        function ShowAlertRejection(tID) {
+        function ShowAlertRemoveAccountVerification(tID) {
             if (tID != null) {
-                document.querySelector('#account-rejection-form textarea[name="Description"]').value = ""
                 document.querySelector('#account-rejection-form input[name="AccountId"]').value = tID
                 $("#modal-account-rejection").modal("show");
+            }
+        }
+
+        function ShowAlertAccountVerification(tID) {
+            if (tID != null) {
+                document.querySelector('#account-verify-form input[name="AccountId"]').value = tID
+                $("#modal-account-verify").modal("show");
             }
         }
     </script>

@@ -8,8 +8,13 @@ namespace DataAccess.Abstract.RepositoryBase;
 
 public interface IRepository<TEntity> where TEntity : IEntity
 {
+    int Count(
+        Expression<Func<TEntity, bool>>? filter = null,
+        bool withDeleted = false
+    );
+
     TEntity Get(
-        Expression<Func<TEntity, bool>> filter, 
+        Expression<Func<TEntity, bool>>? filter = null, 
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,
         bool withDeleted = false
     );

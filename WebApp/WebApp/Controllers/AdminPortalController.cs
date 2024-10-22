@@ -33,8 +33,11 @@ public class AdminPortalController : Controller
         _accountTypeService = accountTypeService;
     }
 
-    public IActionResult Index()
+    public async Task<IActionResult> Index()
     {
+        ViewBag.UserCount = await _userService.CountAsync();
+        ViewBag.AccountCount = await _accountService.CountAsync();
+        ViewBag.TransferCount = await _transferService.CountAsync();
         return View();
     }
 
@@ -51,7 +54,7 @@ public class AdminPortalController : Controller
             PagingRequest = new()
             {
                 Page = defaultFilterModel.PageIndex,
-                PageSize = 2
+                PageSize = 5
             },
         };
 
@@ -123,7 +126,7 @@ public class AdminPortalController : Controller
             PagingRequest = new()
             {
                 Page = filterModel.PageIndex,
-                PageSize = 2
+                PageSize = 5
             },
             Filter = dynamicFilter
         };
@@ -164,7 +167,7 @@ public class AdminPortalController : Controller
             PagingRequest = new()
             {
                 Page = defaultFilterModel.PageIndex,
-                PageSize = 2
+                PageSize = 5
             },
         };
 
@@ -188,7 +191,7 @@ public class AdminPortalController : Controller
             PagingRequest = new()
             {
                 Page = filterModel.PageIndex,
-                PageSize = 2
+                PageSize = 5
             },
         };
 
@@ -309,7 +312,7 @@ public class AdminPortalController : Controller
                 {
                     Field = "Date",
                     Operator = "lte",
-                    Value = filterModel.EndDate.ToString("yyyy-MM-ddTHH:mm:ss"),
+                    Value = filterModel.EndDate.AddHours(DateTime.Now.Hour).AddMinutes(DateTime.Now.Minute).ToString("yyyy-MM-ddTHH:mm:ss"),
                 }
             }
         };
@@ -419,5 +422,27 @@ public class AdminPortalController : Controller
         };
 
         return View(viewModel);
+    }
+
+
+    public async Task<IActionResult> UserAccounts(Guid userId)
+    {
+        ViewBag.User = await _userService.GetUserAsync(userId, new CancellationToken());
+        var userAccounts = await _accountService.GetUserAccountsAsync(userId, new CancellationToken());
+        return View(userAccounts);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> RemoveVerification(Guid accountId)
+    {
+        await _accountService.RemoveAccountVerificationAsync(accountId);
+        return RedirectToAction("AccountList", "AdminPortal");
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Verify(Guid accountId)
+    {
+        await _accountService.VerifyAccountAsync(accountId);
+        return RedirectToAction("AccountList", "AdminPortal");
     }
 }

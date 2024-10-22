@@ -6,7 +6,7 @@ namespace WebApp.ViewModels;
 
 public class VMAdminPortalAccountList
 {
-    public Paginate<AccountResponseDto>? AccountList { get; set; }
+    public Paginate<AccountWithUserResponseDto>? AccountList { get; set; }
     public List<SelectListItem>? UserList { get; set; }
     public List<SelectListItem>? AccountTypeList { get; set; }
     public AccountListFilterModel FilterModel { get; set; } = null!;

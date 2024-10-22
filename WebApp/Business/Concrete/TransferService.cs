@@ -24,6 +24,13 @@ public class TransferService : ITransferService
         _mapper = mapper;
     }
 
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _transferRepository.CountAsync(cancellationToken: cancellationToken);
+        return result;
+    }
+
     public async Task<Paginate<TransferDetailModel>> GetAccountHistoryAsync(AccountHistoryRequestModel requestModel, CancellationToken cancellationToken)
     {
         var paginatedList = await _transferRepository.GetPaginatedListAsync(

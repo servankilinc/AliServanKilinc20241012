@@ -8,7 +8,6 @@ using Model.Dtos.User_;
 using Model.Entities;
 using Model.Models.Account_;
 using Model.Models.User_;
-using System.Collections.Generic;
 
 namespace Business.Concrete;
 
@@ -24,7 +23,14 @@ public class UserService : IUserService
         _accountRepository = accountRepository;
         _mapper = mapper;
     }
-     
+
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _userRepository.CountAsync(cancellationToken: cancellationToken);
+        return result;
+    }
+
     public async Task<UserAccountBasicModel> FindUserByAccountNoAsync(string accountNo, CancellationToken cancellationToken)
     {
         Account account = await _accountRepository.GetAsync(

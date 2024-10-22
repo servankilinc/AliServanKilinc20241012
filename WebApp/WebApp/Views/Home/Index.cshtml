@@ -63,10 +63,13 @@
             }
         </div>
         <div class="col-12 pt-4 pb-2 mt-4 border-top">
-            <a asp-action="Demand" asp-controller="Transfer" asp-route-accountId="@accountModel.Account?.Id" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #1C72AF; color: white;font-weight: 500;">
-                <i class="fa-solid fa-share-from-square text-light"></i>
-                Para Transferi
-            </a>
+            @if (accountModel.Account!.IsVerified)
+            {
+                <a asp-action="Demand" asp-controller="Transfer" asp-route-accountId="@accountModel.Account?.Id" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #1C72AF; color: white;font-weight: 500;">
+                    <i class="fa-solid fa-share-from-square text-light"></i>
+                    Para Transferi
+                </a>
+            }
             <a asp-action="History" asp-controller="Account" asp-route-accountId="@accountModel.Account?.Id" class="mx-2 py-2 px-3 shadow-sm" role="button" style="border-radius:0.75rem; background-color: #13AF54; color: white;font-weight: 500;">
                 <i class="fa-solid fa-file-lines text-light"></i>
                 Hesap Hareketleri
