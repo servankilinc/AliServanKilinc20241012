@@ -10,7 +10,6 @@ Bu proje, .NET teknolojileri kullanılarak geliştirilmiş çok katmanlı bir mi
 * MSSQL Server – Veritabanı yönetim sistemi
 * FluentValidation – Validasyon işlemleri için
 * Repository Pattern – Veri erişim katmanı için
-* AutoMapper – DTO ve entity dönüşümleri için
 * Distributed Dache – Cache Kullanımı içi
 * Javascript & Jquery - ajax, dom manipülasyonları vb. için
 * HTML & Css & Bootstrap - Web MVC uygulaması arayüz tasarımlarında kullanıldı
