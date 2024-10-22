@@ -1,10 +1,12 @@
 ﻿using Business.Abstract;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.AccountType_;
 
 namespace WebApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class AccountTypeController : ControllerBase

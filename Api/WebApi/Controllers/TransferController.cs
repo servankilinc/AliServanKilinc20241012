@@ -1,12 +1,14 @@
 ﻿using Business.Abstract;
 using Core.DataAccess.Pagination;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Models.Account_;
 using Model.Models.Transfer_;
 
 namespace WebApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class TransferController : ControllerBase
@@ -21,6 +23,21 @@ public class TransferController : ControllerBase
         _validatorAccountHistoryRequest = validatorAccountHistoryRequest;
         _validatorTransferRequest = validatorTransferRequest;
         _validatorTransferRejectRequest = validatorTransferRejectRequest;
+    }
+
+    [HttpPost("GetTransferCount")]
+    public async Task<IActionResult> GetTransferCount()
+    { 
+        var result = await _transferService.CountAsync(new CancellationToken());
+        return Ok(result);
+    }
+
+    [Authorize(Roles = "Admin")]
+    [HttpPost("GetAllByPagination")]
+    public async Task<IActionResult> GetAllByPagination([FromBody] TransferListRequestModel requestModel)
+    {
+        var result = await _transferService.GetTransfers(requestModel, new CancellationToken());
+        return Ok(result);
     }
 
     [HttpPost("GetAccountHistory")]

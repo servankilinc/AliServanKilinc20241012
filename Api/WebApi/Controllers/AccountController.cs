@@ -1,11 +1,13 @@
 ﻿using Business.Abstract;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.Account_;
 using Model.Models.Account_;
 
 namespace WebApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class AccountController : ControllerBase
@@ -16,6 +18,34 @@ public class AccountController : ControllerBase
     {
         _accountService = accountService;
         _validatorAccountCreate = validatorAccountCreate;
+    }
+    
+    [HttpGet("GetUserCount")]
+    public async Task<IActionResult> GetUserCount()
+    {
+        var result = await _accountService.CountAsync(new CancellationToken());
+        return Ok(result);
+    }
+
+    [HttpGet("GetAccountInfo")]
+    public async Task<IActionResult> GetAccount(Guid accountId)
+    {
+        var result = await _accountService.GetAccountAsync(accountId ,new CancellationToken());
+        return Ok(result);
+    }
+
+    [HttpGet("GetAll")]
+    public async Task<IActionResult> GetAll(Guid accountId)
+    {
+        var result = await _accountService.GetAllAsync(new CancellationToken());
+        return Ok(result);
+    }
+
+    [HttpGet("GetAllByPagination")]
+    public async Task<IActionResult> GetAllByPagination(AccountListRequestModel requestModel)
+    {
+        var result = await _accountService.GetAllByPaginationAsync(requestModel, new CancellationToken());
+        return Ok(result);
     }
 
     [HttpGet("GetUserAccounts")]

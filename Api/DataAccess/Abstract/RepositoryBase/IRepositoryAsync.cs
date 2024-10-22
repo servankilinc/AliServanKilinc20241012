@@ -8,6 +8,13 @@ namespace DataAccess.Abstract.RepositoryBase;
 
 public interface IRepositoryAsync<TEntity> where TEntity : IEntity
 {
+    Task<int> CountAsync(
+        Expression<Func<TEntity, bool>>? filter = null,
+        bool withDeleted = false,
+        bool enableTracking = true,
+        CancellationToken cancellationToken = default
+    );
+
     Task<TEntity> GetAsync(
         Expression<Func<TEntity, bool>> filter,
         Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null,

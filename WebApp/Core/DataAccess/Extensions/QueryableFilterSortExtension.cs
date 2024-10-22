@@ -51,9 +51,6 @@ public static class QueryableFilterSortExtension
 
         if (!string.IsNullOrWhiteSpace(where))
             queryable = queryable.Where(where, values);
-        Console.WriteLine($"Where Clause: {where}");
-        Console.WriteLine($"Values: {string.Join(", ", values)}");
-        Console.WriteLine($"Queryable After TOFilter: {queryable.ToQueryString()}");
         return queryable;
     }
 

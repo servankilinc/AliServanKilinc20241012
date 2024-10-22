@@ -9,6 +9,7 @@ using Model.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Core.DataAccess.Extensions;
+using System.Linq.Dynamic.Core;
 
 namespace DataAccess.Concrete.RepositoryBase;
 
@@ -22,6 +23,14 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
 
 
     // ************* SYNC PROCESSES **************
+    public int Count(Expression<Func<TEntity, bool>>? filter = null, bool withDeleted = false)
+    {
+        IQueryable<TEntity> queryable = _context.Set<TEntity>();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
+        if (filter != null) queryable = queryable.Where(filter);
+        return queryable.Count();
+    }
+
     public TEntity Get(Expression<Func<TEntity, bool>> filter, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false)
     {
         IQueryable<TEntity> queryable = _context.Set<TEntity>();
@@ -78,8 +87,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return orderBy(queryable).ToList();
@@ -102,8 +111,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return orderBy(queryable).ToPaginate(page, pageSize);
@@ -112,6 +121,15 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
 
 
     // ************* ASYNC PROCESSES **************
+    public async Task<int> CountAsync(Expression<Func<TEntity, bool>>? filter, bool withDeleted, bool enableTracking, CancellationToken cancellationToken)
+    {
+        IQueryable<TEntity> queryable = _context.Set<TEntity>();
+        if (!enableTracking) queryable = queryable.AsNoTracking();
+        if (withDeleted) queryable = queryable.IgnoreQueryFilters();
+        if (filter != null) queryable = queryable.Where(filter);
+        return await queryable.CountAsync(cancellationToken);
+    }
+
 
     public async Task<TEntity> GetAsync(
         Expression<Func<TEntity, bool>> filter,
@@ -176,8 +194,8 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return await orderBy(queryable).ToListAsync(cancellationToken);
@@ -200,12 +218,11 @@ public class EFRepositoryBase<TEntity, TContext> : IRepository<TEntity>, IReposi
         if (!enableTracking) queryable = queryable.AsNoTracking();
         if (withDeleted) queryable = queryable.IgnoreQueryFilters();
         if (include != null) queryable = include(queryable);
-        if (filter != null) queryable.ToFilter(filter);
-        if (sort != null) queryable.ToSort(sort);
+        if (filter != null) queryable = queryable.ToFilter(filter);
+        if (sort != null) queryable = queryable.ToSort(sort);
         if (where != null) queryable = queryable.Where(where);
         if (orderBy != null)
             return await orderBy(queryable).ToPaginateAsync(page, pageSize, cancellationToken);
         return await queryable.ToPaginateAsync(page, pageSize, cancellationToken);
     }
-
 }

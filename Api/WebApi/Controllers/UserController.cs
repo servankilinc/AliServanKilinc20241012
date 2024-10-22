@@ -1,6 +1,6 @@
 ﻿using Business.Abstract;
-using Core.DataAccess.Pagination;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Dtos.User_;
 using Model.Models.Account_;
@@ -8,6 +8,7 @@ using Model.Models.User_;
 
 namespace WebApi.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class UserController : ControllerBase
@@ -20,6 +21,15 @@ public class UserController : ControllerBase
         _validatorUserUpdate = validatorUserUpdate;
     }
 
+
+    [HttpGet("GetUserCount")]
+    public async Task<IActionResult> GetUserCount()
+    {
+        var result = await _userService.CountAsync(new CancellationToken());
+        return Ok(result);
+    }
+
+
     [HttpGet("GetUser")]
     public async Task<IActionResult> GetUser(Guid userId)
     {
@@ -28,10 +38,17 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("GetAll")]
-    public async Task<IActionResult> GetAll([FromBody] UserListRequestModel requestModel)
+    public async Task<IActionResult> GetAll()
     {
-        Paginate<UserResponseDto> responseModel = await _userService.GetAllAsync(requestModel, new CancellationToken());
+        var responseModel = await _userService.GetAllAsync(new CancellationToken());
         return Ok(responseModel);
+    }
+
+    [HttpGet("GetAllByPagination")]
+    public async Task<IActionResult> GetAllUserByPagination([FromBody] UserListRequestModel requestModel)
+    {
+        var result = await _userService.GetAllByPaginationAsync(requestModel, new CancellationToken());
+        return Ok(result);
     }
 
     [HttpGet("FindUserByAccountNo")]

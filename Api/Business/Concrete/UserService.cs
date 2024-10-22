@@ -23,7 +23,13 @@ public class UserService : IUserService
         _accountRepository = accountRepository;
         _mapper = mapper;
     }
-     
+
+    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    {
+        var result = await _userRepository.CountAsync(cancellationToken: cancellationToken);
+        return result;
+    }
+
     public async Task<UserAccountBasicModel> FindUserByAccountNoAsync(string accountNo, CancellationToken cancellationToken)
     {
         Account account = await _accountRepository.GetAsync(
@@ -44,11 +50,11 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<Paginate<UserResponseDto>> GetAllAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken)
+    public async Task<Paginate<UserResponseDto>> GetAllByPaginationAsync(UserListRequestModel userListRequestModel, CancellationToken cancellationToken)
     {
         Paginate<User> paginated = await _userRepository.GetPaginatedListAsync(
-            filter: userListRequestModel.Filter?? default,
-            sort: userListRequestModel.Sort?? default,
+            filter: userListRequestModel.Filter ?? default,
+            sort: userListRequestModel.Sort ?? default,
             page: userListRequestModel.PagingRequest!.Page,
             pageSize: userListRequestModel.PagingRequest.PageSize
         );
@@ -63,6 +69,13 @@ public class UserService : IUserService
         };
     }
 
+    public async Task<List<UserResponseDto>> GetAllAsync(CancellationToken cancellationToken)
+    {
+        var list = await _userRepository.GetAllAsync();
+
+        return list.Select(_mapper.Map<UserResponseDto>).ToList();
+    }
+
     public async Task<UserResponseDto> GetUserAsync(Guid userId, CancellationToken cancellationToken)
     {
         User user = await _userRepository.GetAsync(filter: u => u.Id == userId, cancellationToken: cancellationToken);
@@ -71,7 +84,7 @@ public class UserService : IUserService
 
     public async Task UpdateUserAsync(UserUpdateDto userUpdateModel, CancellationToken cancellationToken)
     {
-        User existData = await _userRepository.GetAsync(filter: u => u.Id == userUpdateModel.Id , cancellationToken: cancellationToken);
+        User existData = await _userRepository.GetAsync(filter: u => u.Id == userUpdateModel.Id, cancellationToken: cancellationToken);
         if (existData == null) throw new BusinessException("Günceleme işlemi gerçekleştirilemedi.");
         await _userRepository.UpdateAsync(_mapper.Map(userUpdateModel, existData), cancellationToken: cancellationToken);
     }
